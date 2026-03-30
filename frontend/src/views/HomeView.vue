@@ -79,11 +79,10 @@
               <li>✓ Draudzīga un droša vide dzīvniekiem</li>
               <li>✓ Veterinārā aprūpe un vakcinācija</li>
               <li>✓ Personīga mācīšana un socializācija</li>
-              <li>✓ Pamatīga pieņemšanas process</li>
               <li>✓ Pēcadopcijas atbalsts un konsultācijas</li>
             </ul>
             <p>
-              Ja jūs meklējat jaunu draudzīgu biedru savai ģimenei, mūs lūdzam apmeklēt mūsu centru un iepazīties ar mūsu brīnumaino dzīvniekiem!
+              Ja jūs meklējat jaunu draudzīgu biedru savai ģimenei, mūs lūdzam apmeklēt mūsu adoptācijas centru un iepazīties ar mūsu brīnumainajiem dzīvniekiem!
             </p>
           </div>
         </div>
