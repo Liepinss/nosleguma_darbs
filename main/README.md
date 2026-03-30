@@ -1,32 +1,35 @@
-## Iekšējās auto koplietošanas sistēmas apraksts
+## Dzīvnieku adoptācijas centra sistēmas apraksts
 
-Šī projekta mērķis ir izstrādāt uzņēmumu vajadzībām pielāgotu iekšējo auto koplietošanas risinājumu organizācijām, kurām ir savs autoparks. Daudzos uzņēmumos transportlīdzekļu rezervācijas joprojām tiek veiktas manuāli — izmantojot telefona zvanus, Excel tabulas vai e‑pastus. Šāda pieeja ir neefektīva, pakļauta kļūdām un apgrūtina autoparka pārvaldību.
+Šī projekta mērķis ir izstrādāt modernu un lietotājam draudzīgu sistēmu dzīvnieku patversmēm un adoptācijas centriem. Daudzās organizācijās dzīvnieku uzskaite, adopcijas process un komunikācija ar potenciālajiem adoptētājiem joprojām tiek veikta manuāli — izmantojot papīra dokumentus, Excel failus vai e-pastus. Šāda pieeja bieži ir laikpatērīga, nepārskatāma un var radīt kļūdas datu apstrādē.
 
-Izstrādājamā sistēma automatizē rezervēšanas procesu, nodrošinot vienotu, drošu un ērtu platformu, kurā notiek:
+Izstrādājamā sistēma digitalizē un vienkāršo adoptācijas procesu, nodrošinot centralizētu platformu, kurā iespējams:
 
-- transportlīdzekļu rezervācijas,
-- braucienu un izmaksu uzskaite,
-- atskaišu ģenerēšana,
-- datu glabāšana un pārvaldība.
+- reģistrēt un pārvaldīt dzīvnieku informāciju,
+- apstrādāt adopcijas pieteikumus,
+- sekot līdzi dzīvnieku veselības un uzturēšanas datiem,
+- uzturēt komunikāciju ar interesentiem,
+- uzkrāt un analizēt statistiku.
 
-Atšķirībā no starptautiskajiem risinājumiem, piemēram, **Ridecell**, **Fleetster** vai **Zipcar for Business**, šī sistēma ir lokāla, latviskota un īpaši pielāgota Latvijas uzņēmumu prasībām un darba videi.
+Atšķirībā no starptautiskām platformām, šī sistēma ir pielāgota vietējām vajadzībām, latviešu valodai un dzīvnieku aizsardzības organizāciju darba specifikai.
 
 ## Datu bāze un lietotāju pārvaldība
 
-Sistēmā tiks glabāti dati par:
+Sistēmā tiek uzglabāti dati par:
 
-- lietotājiem,
-- transportlīdzekļiem,
-- rezervācijām,
-- braucieniem.
+- dzīvniekiem (suga, vecums, veselības stāvoklis u.c.),
+- lietotājiem (darbiniekiem un adoptētājiem),
+- adopcijas pieteikumiem,
+- vizītēm un rezervācijām.
 
-Katram lietotājam tiek piešķirta loma un piekļuves tiesības, kas nosaka viņa iespējas sistēmā. Tas nodrošina drošu un strukturētu piekļuves kontroli.
+Katram lietotājam tiek piešķirta noteikta loma (piemēram, administrators, darbinieks vai adoptētājs), kas nosaka piekļuves tiesības un pieejamās funkcijas. Tas palīdz nodrošināt datu drošību un strukturētu sistēmas lietošanu.
 
 ## Galvenā funkcionalitāte
 
-- Pieteikšanās ar uzņēmuma kontu.
-- Automašīnu pieejamības apskate reāllaikā.
-- Transportlīdzekļu rezervēšana.
-- Digitālās atslēgas funkcionalitāte — iespēja atvērt un aizslēgt auto ar mobilo ierīci.
-- Automātiska braucienu, nobraukuma un izmaksu uzskaite.
-- Administratoriem un vadībai pieejama statistika, atskaites un paziņojumi par rezervācijām.
+- Lietotāju reģistrācija un pieteikšanās sistēmā.
+- Dzīvnieku katalogs ar meklēšanas un filtrēšanas iespējām.
+- Adopcijas pieteikumu iesniegšana un apstrāde.
+- Vizīšu rezervēšana dzīvnieku iepazīšanai.
+- Dzīvnieku veselības un aprūpes datu uzskaite.
+- Paziņojumi par jauniem pieteikumiem vai statusa izmaiņām.
+- Administratoriem pieejamas atskaites un statistika par adopcijām un dzīvnieku uzturēšanu.
+```

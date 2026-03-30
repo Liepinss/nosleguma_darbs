@@ -2,46 +2,49 @@
   <div id="app">
     <header id="home">
       <div class="container nav">
-        <div class="brand">JOSIP FAMILY CARS</div>
+        <div class="brand">DZĪVNIEKU ADOPTĀCIJAS CENTRS</div>
+
         <button 
           class="hamburger" 
           @click="toggleMenu"
           :class="{ active: menuOpen }"
-          aria-label="Toggle menu"
         >
           <span></span>
           <span></span>
           <span></span>
         </button>
+
         <nav :class="{ open: menuOpen }">
           <ul class="menu">
-            <li><a href="#home" @click="closeMenu">Sākums</a></li>
-            <li><a href="#services" @click="closeMenu">Pakalpojumi</a></li>
+            <li><router-link to="/" :to="`/#start`" @click="closeMenu">Sākums</router-link></li>
+            <li><a href="#animals" @click="closeMenu">Dzīvnieki</a></li>
             <li><a href="#about" @click="closeMenu">Par mums</a></li>
             <li><a href="#contact" @click="closeMenu">Kontakti</a></li>
+            <li><router-link to="/admin-login" @click="closeMenu">Admin</router-link></li>
           </ul>
         </nav>
+
+        <div class="auth-buttons">
+          <router-link to="/login" class="btn-login">Pierakstīties</router-link>
+          <router-link to="/signup" class="btn-signup">Reģistrējieties</router-link>
+          <router-link to="/admin-login" class="btn-admin">Admin</router-link>
+        </div>
       </div>
     </header>
 
-    <HomeView />
+    <router-view />
 
     <footer>
       <div class="container footer-wrap">
-        <div>© {{ currentYear }} JOSIP FAMILY CARS. Visas tiesības aizsargātas.</div>
+        <div>© {{ currentYear }} Dzīvnieku adoptācijas centrs</div>
       </div>
     </footer>
   </div>
 </template>
 
 <script>
-import HomeView from './views/HomeView.vue'
-
 export default {
   name: 'App',
-  components: {
-    HomeView
-  },
   data() {
     return {
       menuOpen: false,
@@ -67,16 +70,17 @@ export default {
 }
 
 :root {
-  --black: #000000;
-  --yellow: #FFD700;
-  --dark-gray: #1a1a1a;
-  --light-gray: #2a2a2a;
-  --white: #ffffff;
+  --primary: #FF6B35; /* Vibrant orange for energy and warmth */
+  --secondary: #FFD23F; /* Bright yellow for highlights */
+  --accent: #E94560; /* Pinkish-red for extra pop */
+  --dark-bg: #1A1A2E; /* Deep blue-black for background depth */
+  --light-bg: #16213E; /* Lighter blue for subtle variations */
+  --white: #FFFFFF; /* White for text and contrast */
 }
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: var(--black);
+  background-color: var(--dark-bg);
   color: var(--white);
   line-height: 1.6;
 }
@@ -91,28 +95,31 @@ body {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
+  width: 100%;
 }
 
 header {
-  background-color: var(--dark-gray);
+  background: linear-gradient(135deg, var(--dark-bg), var(--light-bg));
   padding: 1rem 0;
   position: sticky;
   top: 0;
   z-index: 1000;
-  border-bottom: 3px solid var(--yellow);
+  border-bottom: 3px solid var(--primary);
 }
 
 .nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 2rem;
 }
 
 .brand {
   font-size: 1.5rem;
   font-weight: bold;
-  color: var(--yellow);
+  color: var(--primary);
   letter-spacing: 2px;
+  white-space: nowrap;
 }
 
 .hamburger {
@@ -128,7 +135,7 @@ header {
 .hamburger span {
   width: 25px;
   height: 3px;
-  background-color: var(--yellow);
+  background-color: var(--primary);
   margin: 3px 0;
   transition: 0.3s;
   border-radius: 3px;
@@ -150,27 +157,83 @@ header {
   display: flex;
   list-style: none;
   gap: 2rem;
+  flex: 1;
+  white-space: nowrap; /* ensure line does not wrap */
 }
 
-.menu a {
+.menu li {
+  flex: none;
+}
+
+.menu a, .menu router-link {
   color: var(--white);
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s;
   padding: 0.5rem 1rem;
   border-radius: 20px;
+  cursor: pointer;
+  white-space: nowrap; /* keep each menu link on one line */
 }
 
-.menu a:hover {
-  color: var(--yellow);
-  background-color: rgba(255, 215, 0, 0.1);
+.menu a:hover, .menu router-link:hover {
+  color: var(--secondary);
+  background-color: rgba(255, 210, 63, 0.1);
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 0.8rem;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.btn-login, .btn-signup, .btn-admin {
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  border: 2px solid var(--primary);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.btn-admin {
+  color: var(--white);
+  background-color: transparent;
+}
+
+.btn-admin:hover {
+  background-color: rgba(255, 210, 63, 0.3);
+  border-color: var(--secondary);
+}
+
+.btn-login {
+  color: var(--primary);
+  background-color: transparent;
+}
+
+.btn-login:hover {
+  background-color: var(--primary);
+  color: var(--white);
+}
+
+.btn-signup {
+  color: var(--white);
+  background-color: var(--primary);
+}
+
+.btn-signup:hover {
+  background-color: var(--secondary);
+  border-color: var(--secondary);
 }
 
 footer {
-  background-color: var(--dark-gray);
+  background: linear-gradient(135deg, var(--dark-bg), var(--light-bg));
   padding: 2rem 0;
   margin-top: auto;
-  border-top: 3px solid var(--yellow);
+  border-top: 3px solid var(--primary);
   text-align: center;
 }
 
@@ -183,6 +246,10 @@ footer {
     display: flex;
   }
 
+  .auth-buttons {
+    display: none;
+  }
+
   nav {
     position: fixed;
     top: 0;
@@ -190,10 +257,10 @@ footer {
     height: 100vh;
     width: 70%;
     max-width: 300px;
-    background-color: var(--dark-gray);
+    background: linear-gradient(135deg, var(--dark-bg), var(--light-bg));
     transition: right 0.3s ease;
     padding-top: 80px;
-    border-left: 3px solid var(--yellow);
+    border-left: 3px solid var(--primary);
   }
 
   nav.open {
@@ -204,13 +271,14 @@ footer {
     flex-direction: column;
     gap: 0;
     padding: 2rem;
+    flex: none;
   }
 
   .menu li {
     margin: 0.5rem 0;
   }
 
-  .menu a {
+  .menu a, .menu router-link {
     display: block;
     padding: 1rem;
   }

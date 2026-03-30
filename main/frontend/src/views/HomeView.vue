@@ -1,295 +1,745 @@
 <template>
   <div class="home">
+
     <section class="hero">
       <div class="container">
-        <h1 class="hero-title">Ņem un brauc kopā ar JOSIP GROUP</h1>
-        <p class="hero-subtitle">Premium automašīnas jūsu komfortam</p>
+        <h1 class="hero-title">Dzīvnieku adoptācijas centrs</h1>
+        <p class="hero-subtitle">Dod mājas tiem, kam tās vajag</p>
+
         <div class="hero-img">
-          <img 
-            src="https://wallpapers.com/images/hd/yellow-porsche718-cayman-g-t4-side-view-vu9bdfhtyo0mmjus.jpg" 
-            alt="Porsche Cayman GT4" 
+          <img
+            src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b"
+            alt="animals"
           />
         </div>
       </div>
     </section>
 
-    <section class="cars-section">
+    <!-- DZĪVNIEKU SEKCIJA -->
+    <section class="animals-section" id="animals">
       <div class="container">
-        <h2 class="section-title">Mašīnas mūsu uzņēmumā</h2>
-        
+        <h2 class="section-title">Dzīvnieki adopcijai</h2>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+          <input 
+            v-model="searchQuery" 
+            type="text" 
+            placeholder="Meklēt dzīvnieku pēc vārda, dzimuma vai apraksta..."
+            class="search-bar"
+          />
+        </div>
+
         <div class="cards">
-          <article 
-            v-for="car in cars" 
-            :key="car.id" 
+          <article
+            v-for="animal in filteredAnimals"
+            :key="animal.id"
             class="card"
           >
+
             <div class="card-img">
-              <img :src="car.image" :alt="car.title" />
+              <img :src="animal.image" />
             </div>
+
             <div class="card-body">
-              <h3>{{ car.title }}</h3>
-              <p>{{ car.description }}</p>
-              <button 
-                class="btn" 
-                @click="openModal(car)"
-              >Uzzināt vairāk</button>
+              <h3>{{ animal.name }}</h3>
+              <p>{{ animal.description }}</p>
+              <p><strong>Dzimums:</strong> {{ animal.gender }}</p>
+
+              <button
+                class="btn"
+                @click="openModal(animal)"
+              >
+                Skatīt vairāk
+              </button>
+
             </div>
+
           </article>
+
         </div>
       </div>
     </section>
 
-    <section id="about" class="about-section">
+    <!-- PAR SEKCIJU -->
+    <section class="about-section" id="about">
       <div class="container">
         <h2 class="section-title">Par mums</h2>
-        <p>JOSIP FAMILY CARS piedāvā premium klases automašīnas nomai un VIP transfēriem. Mēs garantējam kvalitāti, komfortu un individuālu pieeju katram klientam.</p>
-      </div>
-    </section>
 
-    <transition name="modal">
-      <div 
-        v-if="modalOpen" 
-        class="modal" 
-        @click.self="closeModal"
-      >
-        <div class="modal-dialog">
-          <button class="modal-close" @click="closeModal"><span>x</span></button>
-          <div class="modal-media">
-            <img :src="selectedCar.image" :alt="selectedCar.title" />
-          </div>
-          <div class="modal-content">
-            <h3>{{ selectedCar.title }}</h3>
-            <p>{{ selectedCar.fullDescription }}</p>
+        <div class="about-content">
+          <div class="about-text">
+            <p>
+              Mēs esam <strong>Dzīvnieku Adoptācijas Centrs</strong>, kas veltīts pamesto un vardarbīgi apkalpoto dzīvnieku glābšanai un aprūpei.
+            </p>
+            <p>
+              Mūsu misija ir atrast mīļas un draudzīgas mājas katram dzīvniekam, kas nonāk mūsu centrā. Mēs ticam, ka katrs dzīvnieks ir vērts mīlestības un aprūpes.
+            </p>
+            <h3>Mūsu pakalpojumi:</h3>
+            <ul class="services-list">
+              <li>✓ Draudzīga un droša vide dzīvniekiem</li>
+              <li>✓ Veterinārā aprūpe un vakcinācija</li>
+              <li>✓ Personīga mācīšana un socializācija</li>
+              <li>✓ Pamatīga pieņemšanas process</li>
+              <li>✓ Pēcadopcijas atbalsts un konsultācijas</li>
+            </ul>
+            <p>
+              Ja jūs meklējat jaunu draudzīgu biedru savai ģimenei, mūs lūdzam apmeklēt mūsu centru un iepazīties ar mūsu brīnumaino dzīvniekiem!
+            </p>
           </div>
         </div>
       </div>
+    </section>
+
+    <!-- KONATKTU SEKCIJA -->
+    <section class="contact-section" id="contact">
+      <div class="container">
+        <h2 class="section-title">Kontakti</h2>
+
+        <div class="contact-content">
+          <div class="contact-info">
+            <div class="contact-item">
+              <h3>📍 Adrese</h3>
+              <p>Dzīvnieku Adoptācijas Centrs<br>Torņukalns, Mārupes iela 19, Rīga, LV-1002<br>Latvija</p>
+            </div>
+            <div class="contact-item">
+              <h3>📞 Telefons</h3>
+              <p>+371 29 123 456</p>
+            </div>
+            <div class="contact-item">
+              <h3>📧 E-pasts</h3>
+              <p><a href="mailto:kontakti@dzivniekucentrs.lv">Dīvniekucentrs@gamil.com</a></p>
+            </div>
+            <div class="contact-item">
+              <h3>🕐 Darba laiks</h3>
+              <p>Pirmdiena - Piektdiena: 10:00 - 18:00<br>
+                Sestdiena: 10:00 - 16:00<br>
+                Svētdiena: Slēgts</p>
+            </div>
+          </div>
+
+          <div class="contact-form">
+            <h3>Sūtiet mums jautājumus</h3>
+            <form @submit.prevent="sendMessage">
+              <div class="form-group">
+                <input 
+                  v-model="contactForm.name" 
+                  type="text" 
+                  placeholder="Jūsu vārds"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <input 
+                  v-model="contactForm.email" 
+                  type="email" 
+                  placeholder="Jūsu e-pasts"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <textarea 
+                  v-model="contactForm.message" 
+                  placeholder="Jūsu ziņojums"
+                  rows="5"
+                  required
+                ></textarea>
+              </div>
+              <button type="submit" class="btn-send">Sūtīt</button>
+            </form>
+            <p v-if="contactMessage" :class="contactMessageType">{{ contactMessage }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODELIS PRIEKS DZĪVNIEKU DETALĀM -->
+    <transition name="modal">
+
+      <div
+        v-if="modalOpen && !adoptionModalOpen"
+        class="modal"
+        @click.self="closeModal"
+      >
+
+        <div class="modal-dialog">
+
+          <button
+            class="modal-close"
+            @click="closeModal"
+          >
+            ×
+          </button>
+
+          <div class="modal-media">
+            <img :src="selectedAnimal.image" />
+          </div>
+
+          <div class="modal-content">
+            <h3>{{ selectedAnimal.name }}</h3>
+            <p>{{ selectedAnimal.description }}</p>
+            <p><strong>Dzimums:</strong> {{ selectedAnimal.gender }}</p>
+            <button class="btn-adopt" @click="openAdoptionModal">
+              Pieteikties adopcijai
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
     </transition>
+
+    <!-- ADOPTION FORM MODAL -->
+    <transition name="modal">
+
+      <div
+        v-if="adoptionModalOpen"
+        class="modal"
+        @click.self="closeAdoptionModal"
+      >
+
+        <div class="modal-dialog">
+
+          <button
+            class="modal-close"
+            @click="closeAdoptionModal"
+          >
+            ×
+          </button>
+
+          <div class="modal-content">
+            <h3>Pieteikšanās {{ selectedAnimal.name }} adopcijai</h3>
+            
+            <form @submit.prevent="submitAdoption">
+              <div class="form-group">
+                <label>Jūsu vārds</label>
+                <input 
+                  v-model="adoptionForm.name" 
+                  type="text"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label>E-pasts</label>
+                <input 
+                  v-model="adoptionForm.email" 
+                  type="email"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Telefons</label>
+                <input 
+                  v-model="adoptionForm.phone" 
+                  type="tel"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label>dzīvojamā vieta</label>
+                <input 
+                  v-model="adoptionForm.address" 
+                  type="text"
+                  placeholder="Pilsēta, iela"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Vai ir pieredze ar dzīvniekiem? Ja jā, padalies ar mums.</label>
+                <textarea 
+                  v-model="adoptionForm.experience" 
+                  placeholder="Pastāstiet par savu pieredzi"
+                  rows="4"
+                  required
+                ></textarea>
+              </div>
+
+              <button type="submit" class="btn-send">Pieteikties</button>
+            </form>
+
+            <p v-if="adoptionMessage" :class="adoptionMessageType">{{ adoptionMessage }}</p>
+          </div>
+
+        </div>
+
+      </div>
+
+    </transition>
+
   </div>
 </template>
 
 <script>
 export default {
-  name: 'HomeView',
+
   data() {
     return {
+
       modalOpen: false,
-      selectedCar: {},
-      cars: [
+      adoptionModalOpen: false,
+      searchQuery: '',
+
+      selectedAnimal: {},
+
+      animals: [
         {
           id: 1,
-          title: 'AUDI RS7',
-          description: 'Ekonomisks un ērts pilsētai. Zems degvielas patēriņš.',
-          fullDescription: 'Labs pretendents Citroen Ami. Jauda 40Kw, ka arī svarums 5000kg.',
-          image: 'https://vehicle-images.dealerinspire.com/stock-images/chrome/077b8289802463398e6de305fe3388be.png'
+          name: "Reksis",
+          gender: "Vīrietis",
+          description: "Draudzīgs un enerģisks suns, ideāls ģimenes draugs",
+          image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTglMbr5eE2rhr-f1qPDLurT4p5eT_f5OvlQQ&s"
         },
         {
           id: 2,
-          title: 'MERCEDES G63',
-          description: 'Augsts klīrenss un daudz vietas. Ideāls ģimenei vai ceļojumiem.',
-          fullDescription: 'Stabils bezceļu apstākļos un ērts garos braucienos. Daudz vietas bagāžai. Leģendārs apvidus automobilis ar greznu salonu.',
-          image: 'https://static.tcimg.net/vehicles/primary/900faa1b01db704a/2025-Mercedes-Benz-G-Class-black-full_color-driver_side_front_quarter.png?auto=format&fill=solid&fit=fill&h=202&pad=20&w=360'
+          name: "Šoko",
+          gender: "Vīrietis",
+          description: "Mīļš un mierīgs suns, ideāls senioru kompanija",
+          image: "https://upload.wikimedia.org/wikipedia/commons/6/6e/Golde33443.jpg"
         },
         {
           id: 3,
-          title: 'BMW M5 G90',
-          description: 'Stils un hasls. Brīvdienām un iespaidiem.',
-          fullDescription: 'AMG, RS killer. Ar tādu brauc tikai true racers un programmeistari',
-          image: 'https://www.bmw.is/content/dam/bmw/common/all-models/m-series/m5-sedan/2024/bmw-m-series-m5-sedan.png'
+          name: "Anna",
+          gender: "Sieviete",
+          description: "Jauns un rotaļīgs kaķēns, pilns ar enerģiju",
+          image: "https://upload.wikimedia.org/wikipedia/commons/7/74/A-Cat.jpg"
         },
         {
           id: 4,
-          title: 'BMW X7',
-          description: 'Super Idol car for real gangsteriem.',
-          fullDescription: 'Mašīna kur var vest cilvēkus un kartupeļus',
-          image: 'https://platform.cstatic-images.com/in/v2/stock_photos/0d852f0d-b173-412b-ac98-d4550bcb1a96/bfa04392-82ba-48ec-9a66-be64541db163.png'
-        }
-      ]
+          name: "Dingo",
+          gender: "vīritis",
+          description: "Draudzīgs un enerģisks suns, ideāls ģimenes draugs",
+          image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTglMbr5eE2rhr-f1qPDLurT4p5eT_f5OvlQQ&s"
+        },
+      ],
+      adoptionForm: {
+        name: '',
+        email: '',
+        phone: '',
+        address: '',
+        experience: ''
+      },
+
+      adoptionMessage: '',
+      adoptionMessageType: '',
+
+      contactForm: {
+        name: '',
+        email: '',
+        message: ''
+      },
+
+      contactMessage: '',
+      contactMessageType: ''
+
     }
   },
+
+  computed: {
+    filteredAnimals() {
+      if (!this.searchQuery) return this.animals
+      
+      const query = this.searchQuery.toLowerCase()
+      return this.animals.filter(animal => 
+        animal.name.toLowerCase().includes(query) || 
+        animal.gender.toLowerCase().includes(query) ||
+        animal.description.toLowerCase().includes(query)
+      )
+    }
+  },
+
   methods: {
-    openModal(car) {
-      this.selectedCar = car
+
+    openModal(animal) {
+      this.selectedAnimal = animal
       this.modalOpen = true
-      document.body.style.overflow = 'hidden'
+      this.adoptionModalOpen = false
     },
+
     closeModal() {
       this.modalOpen = false
-      document.body.style.overflow = 'auto'
+    },
+
+    openAdoptionModal() {
+      this.adoptionModalOpen = true
+    },
+
+    closeAdoptionModal() {
+      this.adoptionModalOpen = false
+      this.adoptionForm = {
+        name: '',
+        email: '',
+        phone: '',
+        address: '',
+        experience: ''
+      }
+      this.adoptionMessage = ''
+    },
+
+    submitAdoption() {
+      // Save adoption application to localStorage
+      const adoptions = JSON.parse(localStorage.getItem('adoptions')) || []
+      adoptions.push({
+        id: Date.now(),
+        animalName: this.selectedAnimal.name,
+        animalId: this.selectedAnimal.id,
+        ...this.adoptionForm,
+        submittedAt: new Date().toISOString()
+      })
+      localStorage.setItem('adoptions', JSON.stringify(adoptions))
+
+      this.adoptionMessage = 'Paldies! Jūsu pieteikums tika saņemts. Mēs ar jums sazināsimies drīzumā!'
+      this.adoptionMessageType = 'success'
+
+      // Reset form
+      this.adoptionForm = {
+        name: '',
+        email: '',
+        phone: '',
+        address: '',
+        experience: ''
+      }
+
+      // AIZVĒRT ADOPCIJAS MODALI PĒC 3 SEKUNDĒM
+      setTimeout(() => {
+        this.closeAdoptionModal()
+        this.closeModal()
+      }, 3000)
+    },
+
+    sendMessage() {
+      // SAGLABA ZIŅOJUMU LOCALSTORAGE
+      const messages = JSON.parse(localStorage.getItem('contactMessages')) || []
+      messages.push({
+        id: Date.now(),
+        ...this.contactForm,
+        sentAt: new Date().toISOString()
+      })
+      localStorage.setItem('contactMessages', JSON.stringify(messages))
+
+      this.contactMessage = 'Paldies! Jūsu ziņojums tika sūtīts veiksmīgi!'
+      this.contactMessageType = 'success'
+
+      // Reset form
+      this.contactForm = {
+        name: '',
+        email: '',
+        message: ''
+      }
+
+      // IZDZĒSTI ZIŅOJUMA PĒC 3 SEKUNDĒM
+      setTimeout(() => {
+        this.contactMessage = ''
+      }, 3000)
     }
-  },
-  beforeUnmount() {
-    document.body.style.overflow = 'auto'
+
   }
+
 }
 </script>
 
 <style scoped>
+
 .hero {
-  padding: 4rem 0 2rem;
+  padding: 40px;
   text-align: center;
 }
 
 .hero-title {
-  font-size: 2.5rem;
-  color: var(--yellow);
-  margin-bottom: 1rem;
-  font-weight: bold;
+  font-size: 40px;
+  color:#FF6B35;
 }
 
 .hero-subtitle {
-  font-size: 1.2rem;
-  color: var(--white);
-  margin-bottom: 2rem;
-  opacity: 0.9;
-}
-
-.hero-img {
-  max-width: 900px;
-  margin: 0 auto;
-  border-radius: 30px;
-  overflow: hidden;
-  box-shadow: 0 10px 40px rgba(255, 215, 0, 0.2);
+  color: #df6335db;
 }
 
 .hero-img img {
   width: 100%;
-  height: auto;
-  display: block;
-}
-
-.cars-section {
-  padding: 4rem 0;
+  max-width: 600px;
+  border-radius: 20px;
 }
 
 .section-title {
-  font-size: 2rem;
-  color: var(--yellow);
   text-align: center;
-  margin-bottom: 3rem;
-  font-weight: bold;
+  color: #FF6B35;
+  margin: 30px;
+  font-size: 2rem;
+}
+
+.animals-section {
+  padding: 50px 20px;
+  background-color: var(--dark-bg);
+}
+
+/* SEARCH BAR */
+.search-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.search-bar {
+  width: 100%;
+  max-width: 500px;
+  padding: 12px 20px;
+  border: 2px solid #FF6B35;
+  border-radius: 25px;
+  font-size: 1rem;
+  background: rgba(255, 107, 53, 0.1);
+  color: white;
+}
+
+.search-bar::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.search-bar:focus {
+  outline: none;
+  background: rgba(255, 107, 53, 0.2);
+  box-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
 }
 
 .cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 9rem;
-  margin-top: 2rem;
+  grid-template-columns: repeat(auto-fit, 250px);
+  gap: 20px;
+  justify-content: center;
 }
 
 .card {
-  background-color: var(--light-gray);
-  border-radius: 25px;
-  overflow: hidden;
-  transition: transform 0.3s, box-shadow 0.3s;
-  border: 2px solid transparent;
+  background: linear-gradient(135deg, #FF6B35, #FFD23F);
+  border-radius: 15px;
+  padding: 10px;
+  box-shadow: 0 0 10px #7596ea;
 }
 
-.card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 15px 40px rgba(255, 215, 0, 0.3);
-  border-color: var(--yellow);
-}
-
-.card-img {
-  background-color: var(--dark-gray);
-  padding: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 200px;
-}
-
-.card-img img {
+.card img {
   width: 100%;
-  height: auto;
-  max-height: 180px;
-  object-fit: contain;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 10px;
 }
 
 .card-body {
-  padding: 1.5rem;
+  padding: 10px;
+  color: white;
 }
 
 .card-body h3 {
-  color: var(--yellow);
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.card-body p {
-  color: var(--white);
-  margin-bottom: 1.5rem;
-  line-height: 1.6;
+  margin: 10px 0 5px 0;
 }
 
 .btn {
-  background-color: var(--yellow);
-  color: var(--black);
+  background: #2928273c;
+  color: white;
   border: none;
-  padding: 0.8rem 2rem;
-  border-radius: 25px;
-  font-size: 1rem;
-  font-weight: bold;
+  width: 70px; 
+  height: 50px;
+  border-radius: 40px;
   cursor: pointer;
-  transition: all 0.3s;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  padding: 0;
+  margin-top: 10px;
 }
 
-.btn:hover {
-  background-color: var(--white);
-  transform: scale(1.05);
-  box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
-}
-
+/* ABOUT SECTION */
 .about-section {
-  background-color: var(--dark-gray);
-  padding: 4rem 0;
-  border-radius: 30px;
-  margin: 2rem auto;
-  max-width: 1200px;
+  padding: 50px 20px;
+  background: linear-gradient(135deg, #1A1A2E, #16213E);
 }
 
-.about-section p {
-  text-align: center;
-  font-size: 1.1rem;
-  line-height: 1.8;
+.about-content {
   max-width: 800px;
   margin: 0 auto;
 }
 
+.about-text {
+  color: white;
+  font-size: 1.1rem;
+  line-height: 1.8;
+}
+
+.about-text p {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.about-text h3 {
+  color: #FF6B35;
+  margin: 30px 0 15px 0;
+  text-align: center;
+}
+
+.services-list {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 20px;
+}
+
+.services-list li {
+  padding: 10px;
+  margin: 5px 0;
+  background: rgba(255, 107, 53, 0.1);
+  border-left: 4px solid #FF6B35;
+  border-radius: 5px;
+  color: white;
+}
+
+/* CONTACT SECTION */
+.contact-section {
+  padding: 50px 20px;
+  background-color: var(--dark-bg);
+}
+
+.contact-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.contact-info {
+  color: white;
+}
+
+.contact-item {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: rgba(255, 107, 53, 0.1);
+  border-left: 4px solid #FF6B35;
+  border-radius: 8px;
+}
+
+.contact-item h3 {
+  color: #FF6B35;
+  margin-bottom: 10px;
+}
+
+.contact-item p {
+  margin: 5px 0;
+}
+
+.contact-item a {
+  color: #FFD23F;
+  text-decoration: none;
+}
+
+.contact-item a:hover {
+  text-decoration: underline;
+}
+
+.contact-form {
+  background: linear-gradient(135deg, #FF6B35, #FFD23F);
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(255, 107, 53, 0.5);
+}
+
+.contact-form h3 {
+  color: white;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  color: white;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.contact-form input,
+.contact-form textarea,
+.modal-dialog input,
+.modal-dialog textarea {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus,
+.modal-dialog input:focus,
+.modal-dialog textarea:focus {
+  outline: none;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.btn-send {
+  width: 100%;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.btn-send:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.success {
+  margin-top: 15px;
+  padding: 10px;
+  background-color: rgba(76, 175, 80, 0.3);
+  color: white;
+  border-radius: 8px;
+  text-align: center;
+}
+
+/* MODAL */
 .modal {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.9);
+  inset: 0;
+  background: rgba(0,0,0,0.7);
   display: flex;
-  align-items: center;
   justify-content: center;
-  z-index: 2000;
-  padding: 20px;
+  align-items: center;
+  z-index: 100;
 }
 
 .modal-dialog {
-  background-color: var(--light-gray);
+  background: linear-gradient(135deg, #FF6B35, #FFD23F);
+  padding: 30px;
   border-radius: 30px;
-  max-width: 700px;
-  width: 100%;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(255, 107, 53, 0.5);
+  animation: bounceIn 0.5s ease-out;
   position: relative;
-  overflow: hidden;
-  border: 3px solid var(--yellow);
-  animation: modalSlide 0.3s ease;
 }
 
-@keyframes modalSlide {
-  from {
-    transform: translateY(-50px);
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.3);
     opacity: 0;
   }
-  to {
-    transform: translateY(0);
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
     opacity: 1;
   }
 }
@@ -298,90 +748,79 @@ export default {
   position: absolute;
   top: 15px;
   right: 15px;
-  background-color: var(--yellow);
-  color: var(--black);
+  background: rgba(255, 255, 255, 0.8);
   border: none;
-  width: 40px;
-  height: 40px;
   border-radius: 50%;
-  font-size: 1.5rem;
+  width: 30px;
+  height: 30px;
   cursor: pointer;
-  z-index: 1;
-  transition: all 0.3s;
-  font-weight: bold;
-}
-.modal-close span {
-  top: -3px;
-  position: relative;
-}
-
-.modal-close:hover {
-  background-color: var(--white);
-}
-
-.modal-media {
-  background-color: var(--dark-gray);
-  padding: 2rem;
+  font-size: 18px;
+  color: #FF6B35;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .modal-media img {
-  width: 100%;
+  max-width: 100%;
   max-height: 300px;
-  object-fit: contain;
+  width: auto;
+  height: auto;
+  border-radius: 15px;
+  display: block;
+  margin: 0 auto;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 .modal-content {
-  padding: 2rem;
+  color: white;
 }
 
 .modal-content h3 {
-  color: var(--yellow);
-  font-size: 2rem;
-  margin-bottom: 1rem;
+  text-align: center;
+  margin: 20px 0 15px 0;
+  color: white;
 }
 
 .modal-content p {
-  color: var(--white);
-  font-size: 1.1rem;
-  line-height: 1.8;
+  text-align: center;
+  margin: 10px 0;
 }
 
-.modal-enter-active,
-.modal-leave-active {
-  transition: opacity 0.3s;
+.btn-adopt {
+  width: 100%;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  margin-top: 15px;
 }
 
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
+.btn-adopt:hover {
+  background: rgba(0, 0, 0, 0.5);
 }
 
 @media (max-width: 768px) {
-  .hero-title {
-    font-size: 1.8rem;
+  .contact-content {
+    grid-template-columns: 1fr;
+    gap: 20px;
   }
 
-  .hero-subtitle {
-    font-size: 1rem;
+  .hero-title {
+    font-size: 2rem;
   }
 
   .section-title {
     font-size: 1.5rem;
   }
 
-  .cards {
-    grid-template-columns: 1fr;
-  }
-
-  .modal-dialog {
-    margin: 20px;
-  }
-
-  .modal-content h3 {
-    font-size: 1.5rem;
+  .search-bar {
+    max-width: 100%;
   }
 }
+
 </style>

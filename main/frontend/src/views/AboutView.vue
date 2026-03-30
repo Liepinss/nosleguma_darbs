@@ -1,6 +1,6 @@
 <template>
   <div class="about">
-    <h1>This is an about page</h1>
+    <h1>Šī mājas lappa ir par adoptācijas centru kur var adopēt dzīvniekus</h1>
   </div>
 </template>
 
