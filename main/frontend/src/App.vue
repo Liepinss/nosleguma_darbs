@@ -2,7 +2,7 @@
   <div id="app">
     <header id="home">
       <div class="container nav">
-        <div class="brand">DZĪVNIEKU ADOPTĀCIJAS CENTRS</div>
+        <div class="brand">ADOPTĀCIJAS CENTRS</div>
 
         <button 
           class="hamburger" 
@@ -20,7 +20,7 @@
             <li><a href="#animals" @click="closeMenu">Dzīvnieki</a></li>
             <li><a href="#about" @click="closeMenu">Par mums</a></li>
             <li><a href="#contact" @click="closeMenu">Kontakti</a></li>
-            <li><router-link to="/admin-login" @click="closeMenu">Admin</router-link></li>
+          
           </ul>
         </nav>
 
@@ -43,8 +43,10 @@
 </template>
 
 <script>
+
 export default {
   name: 'App',
+
   data() {
     return {
       menuOpen: false,
@@ -70,16 +72,16 @@ export default {
 }
 
 :root {
-  --primary: #FF6B35; /* Vibrant orange for energy and warmth */
-  --secondary: #FFD23F; /* Bright yellow for highlights */
-  --accent: #E94560; /* Pinkish-red for extra pop */
+  --primary: #db602b; /* Burnt clay for a warmer, deeper accent */
+  --secondary: #B57A48; /* Bronze warmth for richer highlights */
+  --accent: #E7B07F; /* Honey-peach glow for softer contrast */
   --dark-bg: #1A1A2E; /* Deep blue-black for background depth */
   --light-bg: #16213E; /* Lighter blue for subtle variations */
   --white: #FFFFFF; /* White for text and contrast */
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Segoe UI', Tahoma, "Geneva", Verdana, sans-serif;
   background-color: var(--dark-bg);
   color: var(--white);
   line-height: 1.6;
@@ -184,7 +186,7 @@ header {
 .auth-buttons {
   display: flex;
   gap: 0.8rem;
-  margin-left: auto;
+  margin-left: 0;
   flex-shrink: 0;
 }
 

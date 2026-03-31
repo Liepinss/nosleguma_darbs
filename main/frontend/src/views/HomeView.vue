@@ -79,11 +79,10 @@
               <li>✓ Draudzīga un droša vide dzīvniekiem</li>
               <li>✓ Veterinārā aprūpe un vakcinācija</li>
               <li>✓ Personīga mācīšana un socializācija</li>
-              <li>✓ Pamatīga pieņemšanas process</li>
               <li>✓ Pēcadopcijas atbalsts un konsultācijas</li>
             </ul>
             <p>
-              Ja jūs meklējat jaunu draudzīgu biedru savai ģimenei, mūs lūdzam apmeklēt mūsu centru un iepazīties ar mūsu brīnumaino dzīvniekiem!
+              Ja jūs meklējat jaunu draudzīgu biedru savai ģimenei, mūs lūdzam apmeklēt mūsu adoptācijas centru un iepazīties ar mūsu brīnumainajiem dzīvniekiem!
             </p>
           </div>
         </div>
@@ -103,11 +102,11 @@
             </div>
             <div class="contact-item">
               <h3>📞 Telefons</h3>
-              <p>+371 29 123 456</p>
+              <p>+371 29 316 942</p>
             </div>
             <div class="contact-item">
               <h3>📧 E-pasts</h3>
-              <p><a href="mailto:kontakti@dzivniekucentrs.lv">Dīvniekucentrs@gamil.com</a></p>
+              <p><a href="mailto:kontakti@dzivniekucentrs.lv">Adoptācijascentrs@gamil.com</a></p>
             </div>
             <div class="contact-item">
               <h3>🕐 Darba laiks</h3>
@@ -719,11 +718,11 @@ export default {
 
 .modal-dialog {
   background: linear-gradient(135deg, #FF6B35, #FFD23F);
-  padding: 30px;
+  padding: 35px;
   border-radius: 30px;
-  max-width: 500px;
+  max-width: 400px;
   width: 90%;
-  max-height: 90vh;
+  max-height: 75vh;
   overflow-y: auto;
   box-shadow: 0 10px 30px rgba(255, 107, 53, 0.5);
   animation: bounceIn 0.5s ease-out;
