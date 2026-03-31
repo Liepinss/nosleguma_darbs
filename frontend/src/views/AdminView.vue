@@ -21,11 +21,21 @@
         >
           Adopcijas pieteikumi
         </button>
+        <button 
+          :class="{ active: activeTab === 'animals' }"
+          @click="activeTab = 'animals'"
+          class="tab-btn"
+        >
+          Dzīvnieki
+        </button>
       </div>
 
       <!-- MESSAGES TAB -->
       <div v-if="activeTab === 'messages'" class="tab-content">
-        <h2>Kontaktu ziņojumi</h2>
+        <div class="tab-header-row">
+          <h2>Kontaktu ziņojumi</h2>
+          <button @click="loadData" class="btn-refresh">Atsvaidzināt</button>
+        </div>
         <div v-if="messages.length === 0" class="no-data">
           Nav ziņojumu
         </div>
@@ -36,9 +46,17 @@
               <span class="message-date">{{ formatDate(message.sentAt) }}</span>
             </div>
             <p><strong>E-pasts:</strong> {{ message.email }}</p>
+            <p v-if="message.selectedAnimals"><strong>Izvēlētie dzīvnieki:</strong> {{ message.selectedAnimals }}</p>
             <p><strong>Ziņojums:</strong></p>
             <p class="message-text">{{ message.message }}</p>
-            <button @click="deleteMessage(message.id)" class="btn-delete">Dzēst</button>
+            <p><strong>Status:</strong> {{ message.status || 'pending' }}</p>
+            <div class="message-actions">
+              <button v-if="message.status === 'pending'" @click="approveMessage(message.id)" class="btn-approve">Apstiprināt</button>
+              <button v-if="message.status === 'pending'" @click="declineMessage(message.id)" class="btn-decline">Noraidīt</button>
+              <span v-else-if="message.status === 'approved'" class="message-approved">Apstiprināts</span>
+              <span v-else-if="message.status === 'declined'" class="message-declined">Noraidīts</span>
+              <button @click="deleteMessage(message.id)" class="btn-delete">Dzēst</button>
+            </div>
           </div>
         </div>
       </div>
@@ -65,6 +83,46 @@
           </div>
         </div>
       </div>
+      <div v-if="activeTab === 'animals'" class="tab-content">
+        <h2>Pievienot jaunu dzīvnieku</h2>
+        <div class="animal-form">
+          <div class="form-row">
+            <label>Vārds</label>
+            <input v-model="animalForm.name" type="text" placeholder="Dzīvnieka vārds" />
+          </div>
+          <div class="form-row">
+            <label>Dzimums</label>
+            <input v-model="animalForm.gender" type="text" placeholder="Dzimums" />
+          </div>
+          <div class="form-row">
+            <label>Kategorija</label>
+            <input v-model="animalForm.species" type="text" placeholder="Piemēram Suns, Kaķis" />
+          </div>
+          <div class="form-row">
+            <label>Apraksts</label>
+            <textarea v-model="animalForm.description" placeholder="Apraksts"></textarea>
+          </div>
+          <div class="form-row">
+            <label>Attēla URL</label>
+            <input v-model="animalForm.image" type="text" placeholder="https://..." />
+          </div>
+          <button @click="addAnimal" class="btn-save">Saglabāt dzīvnieku</button>
+        </div>
+
+        <h2>Esošie dzīvnieki</h2>
+        <div v-if="storedAnimals.length === 0" class="no-data">
+          Nav pievienotu dzīvnieku
+        </div>
+        <div v-else class="animals-list">
+          <div v-for="animal in storedAnimals" :key="animal.id" class="animal-item">
+            <div>
+              <strong>{{ animal.name }}</strong> — {{ animal.gender }}
+              <p>{{ animal.description }}</p>
+            </div>
+            <button @click="deleteAnimal(animal.id)" class="btn-delete">Dzēst</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -76,16 +134,60 @@ export default {
     return {
       activeTab: 'messages',
       messages: [],
-      adoptions: []
+      adoptions: [],
+      storedAnimals: [],
+      animalForm: {
+        name: '',
+        gender: '',
+        description: '',
+        image: ''
+      }
     }
   },
   mounted() {
     this.loadData()
+    this.loadAnimals()
+    window.addEventListener('storage', this.loadData)
+  },
+  beforeUnmount() {
+    window.removeEventListener('storage', this.loadData)
   },
   methods: {
     loadData() {
       this.messages = JSON.parse(localStorage.getItem('contactMessages')) || []
       this.adoptions = JSON.parse(localStorage.getItem('adoptions')) || []
+    },
+    loadAnimals() {
+      this.storedAnimals = JSON.parse(localStorage.getItem('animals')) || []
+    },
+    addAnimal() {
+      if (!this.animalForm.name || !this.animalForm.image) {
+        return
+      }
+      const animals = JSON.parse(localStorage.getItem('animals')) || []
+      const newAnimal = {
+        id: Date.now(),
+        name: this.animalForm.name,
+        species: this.animalForm.species || 'Cits',
+        gender: this.animalForm.gender || 'Nav norādīts',
+        description: this.animalForm.description || 'Nav apraksta',
+        image: this.animalForm.image
+      }
+      animals.push(newAnimal)
+      localStorage.setItem('animals', JSON.stringify(animals))
+      this.loadAnimals()
+      this.animalForm = {
+        name: '',
+        gender: '',
+        description: '',
+        image: ''
+      }
+    },
+    deleteAnimal(id) {
+      const animals = JSON.parse(localStorage.getItem('animals')) || []
+      const updated = animals.filter(animal => animal.id !== id)
+      localStorage.setItem('animals', JSON.stringify(updated))
+      this.loadAnimals()
     },
     formatDate(dateString) {
       const date = new Date(dateString)
@@ -94,6 +196,42 @@ export default {
     deleteMessage(id) {
       this.messages = this.messages.filter(m => m.id !== id)
       localStorage.setItem('contactMessages', JSON.stringify(this.messages))
+      window.dispatchEvent(new Event('contactMessagesUpdated'))
+    },
+    approveMessage(id) {
+      const messages = JSON.parse(localStorage.getItem('contactMessages') || '[]')
+      const updated = messages.map(message => {
+        if (message.id === id) {
+          return {
+            ...message,
+            status: 'approved',
+            approvedAt: new Date().toISOString(),
+            moderatedAt: new Date().toISOString(),
+            read: false
+          }
+        }
+        return message
+      })
+      localStorage.setItem('contactMessages', JSON.stringify(updated))
+      window.dispatchEvent(new Event('contactMessagesUpdated'))
+      this.loadData()
+    },
+    declineMessage(id) {
+      const messages = JSON.parse(localStorage.getItem('contactMessages') || '[]')
+      const updated = messages.map(message => {
+        if (message.id === id) {
+          return {
+            ...message,
+            status: 'declined',
+            moderatedAt: new Date().toISOString(),
+            read: false
+          }
+        }
+        return message
+      })
+      localStorage.setItem('contactMessages', JSON.stringify(updated))
+      window.dispatchEvent(new Event('contactMessagesUpdated'))
+      this.loadData()
     },
     deleteAdoption(id) {
       this.adoptions = this.adoptions.filter(a => a.id !== id)
@@ -171,8 +309,72 @@ export default {
   color: white;
 }
 
+.btn-refresh {
+  padding: 10px 18px;
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 16px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: background 0.2s ease;
+}
+
+.btn-refresh:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.tab-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
 .tab-btn:hover {
   background: rgba(255, 107, 53, 0.2);
+}
+
+.btn-save {
+  width: 100%;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #FF6B35, #FFD23F);
+  border: none;
+  border-radius: 999px;
+  margin: 7px;
+  color: #08121f;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 12px 24px rgba(255, 107, 53, 0.24);
+}
+
+.btn-save:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 28px rgba(255, 107, 53, 0.3);
+}
+
+.admin-content input,
+.admin-content textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid rgba(255,255,255,0.35);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.08);
+  color: white;
+  font-size: 1rem;
+}
+
+.admin-content input::placeholder,
+.admin-content textarea::placeholder {
+  color: rgba(255,255,255,0.6);
+}
+
+.admin-content textarea {
+  min-height: 120px;
+  resize: vertical;
 }
 
 .tab-content h2 {
@@ -248,6 +450,66 @@ export default {
 
 .btn-delete:hover {
   background: rgba(0, 0, 0, 0.5);
+}
+
+.btn-approve {
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #1A1A2E;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 10px;
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+.btn-approve:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.btn-decline {
+  padding: 8px 16px;
+  background: rgba(255, 0, 0, 0.18);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 10px;
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+.btn-decline:hover {
+  background: rgba(255, 0, 0, 0.3);
+}
+
+.message-declined {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  background: rgba(255, 0, 0, 0.2);
+  border-radius: 8px;
+  color: white;
+  font-weight: bold;
+}
+
+.message-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.message-approved {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  color: white;
+  font-weight: bold;
 }
 
 @media (max-width: 768px) {

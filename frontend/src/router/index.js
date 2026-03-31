@@ -35,6 +35,12 @@ const router = createRouter({
       meta: { requiresAdmin: true }
     },
     {
+      path: '/account',
+      name: 'account',
+      component: () => import('../views/AccountView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/about',
       name: 'about',
       component: () => import('../views/AboutView.vue'),
@@ -42,7 +48,7 @@ const router = createRouter({
   ],
 })
 
-// Admin protection
+// Route protection
 router.beforeEach((to, from, next) => {
   if (to.meta.requiresAdmin) {
     const isAdminLoggedIn = localStorage.getItem('adminLoggedIn')
@@ -50,6 +56,13 @@ router.beforeEach((to, from, next) => {
       next()
     } else {
       next('/admin-login')
+    }
+  } else if (to.meta.requiresAuth) {
+    const isLoggedIn = localStorage.getItem('userLoggedIn')
+    if (isLoggedIn) {
+      next()
+    } else {
+      next('/login')
     }
   } else {
     next()

@@ -1,5 +1,5 @@
 <template>
-  <div class="home">
+  <div id="start" class="home">
 
     <section class="hero">
       <div class="container">
@@ -18,16 +18,29 @@
     <!-- DZĪVNIEKU SEKCIJA -->
     <section class="animals-section" id="animals">
       <div class="container">
-        <h2 class="section-title">Dzīvnieki adopcijai</h2>
+        <h2 class="section-title">Pieejamie dzīvnieki</h2>
 
         <!-- Search Bar -->
         <div class="search-container">
-          <input 
-            v-model="searchQuery" 
-            type="text" 
-            placeholder="Meklēt dzīvnieku pēc vārda, dzimuma vai apraksta..."
-            class="search-bar"
-          />
+          <div class="search-field">
+            <span class="search-icon"></span>
+            <input 
+              v-model="searchQuery" 
+              type="text" 
+              placeholder="Meklēt dzīvnieku pēc vārda, dzimuma vai apraksta..."
+              class="search-bar"
+            />
+          </div>
+
+          <div class="select-wrapper">
+            <label class="filter-label"></label>
+            <select v-model="selectedSpecies" class="animal-select">
+              <option value="">Visi dzīvnieki</option>
+              <option v-for="species in speciesOptions" :key="species" :value="species">
+                {{ species }}
+              </option>
+            </select>
+          </div>
         </div>
 
         <div class="cards">
@@ -39,6 +52,7 @@
 
             <div class="card-img">
               <img :src="animal.image" />
+              <div v-if="isTaken(animal.id)" class="status-badge">Aizņemts</div>
             </div>
 
             <div class="card-body">
@@ -49,8 +63,9 @@
               <button
                 class="btn"
                 @click="openModal(animal)"
+                :disabled="isTaken(animal.id)"
               >
-                Skatīt vairāk
+                {{ isTaken(animal.id) ? 'Aizņemts' : 'Skatīt vairāk' }}
               </button>
 
             </div>
@@ -102,11 +117,11 @@
             </div>
             <div class="contact-item">
               <h3>📞 Telefons</h3>
-              <p>+371 29 123 456</p>
+              <p>+371 29 316 942</p>
             </div>
             <div class="contact-item">
               <h3>📧 E-pasts</h3>
-              <p><a href="mailto:kontakti@dzivniekucentrs.lv">Dīvniekucentrs@gamil.com</a></p>
+              <p><a href="mailto:kontakti@dzivniekucentrs.lv">Adoptācijascentrs@gamil.com</a></p>
             </div>
             <div class="contact-item">
               <h3>🕐 Darba laiks</h3>
@@ -281,13 +296,16 @@ export default {
       modalOpen: false,
       adoptionModalOpen: false,
       searchQuery: '',
+      selectedSpecies: '',
+      takenAnimalIds: [],
 
       selectedAnimal: {},
 
-      animals: [
+      defaultAnimals: [
         {
           id: 1,
           name: "Reksis",
+          species: "Suns",
           gender: "Vīrietis",
           description: "Draudzīgs un enerģisks suns, ideāls ģimenes draugs",
           image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTglMbr5eE2rhr-f1qPDLurT4p5eT_f5OvlQQ&s"
@@ -295,6 +313,7 @@ export default {
         {
           id: 2,
           name: "Šoko",
+          species: "Suns",
           gender: "Vīrietis",
           description: "Mīļš un mierīgs suns, ideāls senioru kompanija",
           image: "https://upload.wikimedia.org/wikipedia/commons/6/6e/Golde33443.jpg"
@@ -302,6 +321,7 @@ export default {
         {
           id: 3,
           name: "Anna",
+          species: "Kaķis",
           gender: "Sieviete",
           description: "Jauns un rotaļīgs kaķēns, pilns ar enerģiju",
           image: "https://upload.wikimedia.org/wikipedia/commons/7/74/A-Cat.jpg"
@@ -309,11 +329,13 @@ export default {
         {
           id: 4,
           name: "Dingo",
+          species: "Suns",
           gender: "vīritis",
           description: "Draudzīgs un enerģisks suns, ideāls ģimenes draugs",
           image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTglMbr5eE2rhr-f1qPDLurT4p5eT_f5OvlQQ&s"
         },
       ],
+      animals: [],
       adoptionForm: {
         name: '',
         email: '',
@@ -337,12 +359,25 @@ export default {
     }
   },
 
+  mounted() {
+    this.loadAnimals()
+    this.loadTakenAnimals()
+  },
+
   computed: {
+    speciesOptions() {
+      const species = this.animals.map(animal => animal.species || 'Cits')
+      return [...new Set(species)]
+    },
     filteredAnimals() {
-      if (!this.searchQuery) return this.animals
+      let list = this.animals
+      if (this.selectedSpecies) {
+        list = list.filter(animal => animal.species === this.selectedSpecies)
+      }
+      if (!this.searchQuery) return list
       
       const query = this.searchQuery.toLowerCase()
-      return this.animals.filter(animal => 
+      return list.filter(animal => 
         animal.name.toLowerCase().includes(query) || 
         animal.gender.toLowerCase().includes(query) ||
         animal.description.toLowerCase().includes(query)
@@ -385,10 +420,12 @@ export default {
         id: Date.now(),
         animalName: this.selectedAnimal.name,
         animalId: this.selectedAnimal.id,
+        animalImage: this.selectedAnimal.image,
         ...this.adoptionForm,
         submittedAt: new Date().toISOString()
       })
       localStorage.setItem('adoptions', JSON.stringify(adoptions))
+      this.loadTakenAnimals()
 
       this.adoptionMessage = 'Paldies! Jūsu pieteikums tika saņemts. Mēs ar jums sazināsimies drīzumā!'
       this.adoptionMessageType = 'success'
@@ -407,6 +444,23 @@ export default {
         this.closeAdoptionModal()
         this.closeModal()
       }, 3000)
+    },
+
+    loadAnimals() {
+      const storedAnimals = JSON.parse(localStorage.getItem('animals') || '[]')
+      const normalizedStored = storedAnimals.map(animal => ({
+        species: animal.species || 'Cits',
+        ...animal
+      }))
+      this.animals = normalizedStored.length ? [...this.defaultAnimals, ...normalizedStored] : this.defaultAnimals
+    },
+    loadTakenAnimals() {
+      const adoptions = JSON.parse(localStorage.getItem('adoptions') || '[]')
+      this.takenAnimalIds = adoptions.map(adoption => adoption.animalId)
+    },
+
+    isTaken(animalId) {
+      return this.takenAnimalIds.includes(animalId)
     },
 
     sendMessage() {
@@ -456,6 +510,14 @@ export default {
   color: #df6335db;
 }
 
+.hero-tagline {
+  color: white;
+  font-size: 1.3rem;
+  margin: 10px 0 0;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .hero-img img {
   width: 100%;
   max-width: 600px;
@@ -477,29 +539,92 @@ export default {
 /* SEARCH BAR */
 .search-container {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
+  align-items: center;
+  gap: 16px;
   margin-bottom: 30px;
+}
+
+.search-field {
+  position: relative;
+  flex: 1 1 340px;
+  min-width: 260px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  opacity: 0.8;
 }
 
 .search-bar {
   width: 100%;
-  max-width: 500px;
-  padding: 12px 20px;
-  border: 2px solid #FF6B35;
-  border-radius: 25px;
+  padding: 14px 20px 14px 44px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 30px;
   font-size: 1rem;
-  background: rgba(255, 107, 53, 0.1);
+  background: rgba(255, 255, 255, 0.1);
   color: white;
+  transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
 }
 
 .search-bar::placeholder {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .search-bar:focus {
   outline: none;
-  background: rgba(255, 107, 53, 0.2);
-  box-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
+  background: rgba(255, 255, 255, 0.16);
+  border-color: #FFD23F;
+  box-shadow: 0 0 20px rgba(255, 209, 63, 0.25);
+}
+
+.select-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 210px;
+}
+
+.filter-label {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.animal-select {
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 1rem;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  background-image: linear-gradient(45deg, transparent 50%, white 50%), linear-gradient(135deg, white 50%, transparent 50%);
+  background-position: calc(100% - 18px) calc(50% + 1px), calc(100% - 10px) calc(50% + 1px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+.animal-select option {
+  background: rgba(26, 26, 46, 0.98);
+  color: #ffffff;
+}
+
+.animal-select:focus {
+  outline: none;
+  border-color: #FFD23F;
+  box-shadow: 0 0 16px rgba(255, 209, 63, 0.2);
 }
 
 .cards {
@@ -532,20 +657,41 @@ export default {
   margin: 10px 0 5px 0;
 }
 
+.card-img {
+  position: relative;
+}
+
+.status-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 18px;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
 .btn {
   background: #2928273c;
   color: white;
   border: none;
-  width: 70px; 
+  min-width: 90px;
   height: 50px;
   border-radius: 40px;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   font-size: 12px;
-  padding: 0;
+  padding: 0 16px;
   margin-top: 10px;
+}
+
+.btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* ABOUT SECTION */
@@ -718,11 +864,11 @@ export default {
 
 .modal-dialog {
   background: linear-gradient(135deg, #FF6B35, #FFD23F);
-  padding: 30px;
+  padding: 35px;
   border-radius: 30px;
-  max-width: 500px;
+  max-width: 400px;
   width: 90%;
-  max-height: 90vh;
+  max-height: 75vh;
   overflow-y: auto;
   box-shadow: 0 10px 30px rgba(255, 107, 53, 0.5);
   animation: bounceIn 0.5s ease-out;

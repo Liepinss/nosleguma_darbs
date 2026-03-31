@@ -25,6 +25,7 @@
         </div>
         <button type="submit" class="btn-submit">Pierakstīties</button>
       </form>
+      <p v-if="message" :class="messageType === 'success' ? 'success-message' : 'error-message'">{{ message }}</p>
       <p class="switch-form">
         Nav konta? <router-link to="/signup">Reģistrējieties</router-link>
       </p>
@@ -38,14 +39,29 @@ export default {
   data() {
     return {
       email: '',
-      password: ''
+      password: '',
+      message: '',
+      messageType: ''
     }
   },
   methods: {
     handleLogin() {
-      // Handle login logic here
-      console.log('Login:', { email: this.email, password: this.password })
-      // You can add API call here
+      const users = JSON.parse(localStorage.getItem('users') || '[]')
+      const user = users.find(u => u.email === this.email && u.password === this.password)
+
+      if (user) {
+        localStorage.setItem('userLoggedIn', 'true')
+        localStorage.setItem('userEmail', this.email)
+        localStorage.setItem('userName', user.name)
+        this.message = 'Pierakstīšanās veiksmīga! Pāradresējam...'
+        this.messageType = 'success'
+        setTimeout(() => {
+          this.$router.push('/account')
+        }, 1000)
+      } else {
+        this.message = 'Nepareizs e-pasts vai parole.'
+        this.messageType = 'error'
+      }
     }
   }
 }

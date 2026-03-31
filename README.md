@@ -1,6 +1,6 @@
 ## Dzīvnieku adoptācijas centra sistēmas apraksts
 
-Šī projekta mērķis ir izstrādāt modernu un lietotājam draudzīgu sistēmu dzīvnieku patversmēm un adoptācijas centriem. Daudzās organizācijās dzīvnieku uzskaite, adopcijas process un komunikācija ar potenciālajiem adoptētājiem joprojām tiek veikta manuāli — izmantojot papīra dokumentus, Excel failus vai e-pastus. Šāda pieeja bieži ir laikpatērīga, nepārskatāma un var radīt kļūdas datu apstrādē.
+Šī projekta mērķis ir izstrādāt uzņēmumu vajadzībām pielāgotu iekšējo auto koplietošanas risinājumu organizācijām, kurām ir savs autoparks. Daudzos uzņēmumos transportlīdzekļu rezervācijas joprojām tiek veiktas manuāli — izmantojot telefona zvanus, Excel tabulas vai e‑pastus. Šāda pieeja ir neefektīva, pakļauta kļūdām un apgrūtina autoparka pārvaldību.
 
 Izstrādājamā sistēma digitalizē un vienkāršo adoptācijas procesu, nodrošinot centralizētu platformu, kurā iespējams:
 
@@ -25,11 +25,9 @@ Katram lietotājam tiek piešķirta noteikta loma (piemēram, administrators, da
 
 ## Galvenā funkcionalitāte
 
-- Lietotāju reģistrācija un pieteikšanās sistēmā.
-- Dzīvnieku katalogs ar meklēšanas un filtrēšanas iespējām.
-- Adopcijas pieteikumu iesniegšana un apstrāde.
-- Vizīšu rezervēšana dzīvnieku iepazīšanai.
-- Dzīvnieku veselības un aprūpes datu uzskaite.
-- Paziņojumi par jauniem pieteikumiem vai statusa izmaiņām.
-- Administratoriem pieejamas atskaites un statistika par adopcijām un dzīvnieku uzturēšanu.
-```
+- Pieteikšanās ar uzņēmuma kontu.
+- Automašīnu pieejamības apskate reāllaikā.
+- Transportlīdzekļu rezervēšana.
+- Digitālās atslēgas funkcionalitāte — iespēja atvērt un aizslēgt auto ar mobilo ierīci.
+- Automātiska braucienu, nobraukuma un izmaksu uzskaite.
+- Administratoriem un vadībai pieejama statistika, atskaites un paziņojumi par rezervācijām.
