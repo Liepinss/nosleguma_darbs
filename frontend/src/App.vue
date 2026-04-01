@@ -50,17 +50,12 @@
         </div>
         <div v-else class="dropdown-items">
           <div v-for="notification in notificationList" :key="notification.id" class="dropdown-item">
-            <div class="dropdown-item-row">
-              <div>
-                <p class="dropdown-message">{{ notification.message }}</p>
-                <p class="dropdown-meta">
-                  <span>{{ notification.status === 'approved' ? 'Apstiprināts' : 'Noraidīts' }}</span>
-                  •
-                  <span>{{ formatDropdownDate(notification.moderatedAt || notification.approvedAt || notification.sentAt) }}</span>
-                </p>
-              </div>
-              <button class="dropdown-delete" @click.stop="deleteNotification(notification.id)">Dzēst</button>
-            </div>
+            <p class="dropdown-message">{{ notification.message }}</p>
+            <p class="dropdown-meta">
+              <span>{{ notification.status === 'approved' ? 'Apstiprināts' : 'Noraidīts' }}</span>
+              •
+              <span>{{ formatDropdownDate(notification.moderatedAt || notification.approvedAt || notification.sentAt) }}</span>
+            </p>
           </div>
         </div>
       </div>
@@ -70,7 +65,7 @@
 
     <footer>
       <div class="container footer-wrap">
-        <div>© {{ currentYear }} Dzīvnieku adoptācijas centrs</div>
+        <div>© {{ currentYear }} LAIMĪGĀS ĶEPAS</div>
       </div>
     </footer>
   </div>
@@ -155,12 +150,6 @@ export default {
       if (this.showNotificationPanel) {
         this.refreshNotifications()
       }
-    },
-    deleteNotification(id) {
-      const messages = JSON.parse(localStorage.getItem('contactMessages') || '[]')
-      const updated = messages.filter(message => message.id !== id)
-      localStorage.setItem('contactMessages', JSON.stringify(updated))
-      this.refreshNotifications()
     },
     closeNotificationPanel() {
       this.showNotificationPanel = false
@@ -443,27 +432,6 @@ header {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 14px;
   padding: 0.9rem;
-}
-
-.dropdown-item-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-}
-
-.dropdown-delete {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  color: rgba(255, 255, 255, 0.9);
-  border-radius: 12px;
-  padding: 0.35rem 0.75rem;
-  cursor: pointer;
-  font-size: 0.85rem;
-}
-
-.dropdown-delete:hover {
-  background: rgba(255, 255, 255, 0.08);
 }
 
 .dropdown-message {
