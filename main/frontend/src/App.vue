@@ -2,7 +2,7 @@
   <div id="app">
     <header id="home">
       <div class="container nav">
-        <div class="brand">ADOPTĀCIJAS CENTRS</div>
+        <div class="brand">LAIMĪGĀS ĶEPAS</div>
 
         <button 
           class="hamburger" 
@@ -16,7 +16,7 @@
 
         <nav :class="{ open: menuOpen }">
           <ul class="menu">
-            <li><router-link to="/" :to="`/#start`" @click="closeMenu">Sākums</router-link></li>
+            <li><a href="/" @click.prevent="goHome">Sākums</a></li>
             <li><a href="#animals" @click="closeMenu">Dzīvnieki</a></li>
             <li><a href="#about" @click="closeMenu">Par mums</a></li>
             <li><a href="#contact" @click="closeMenu">Kontakti</a></li>
@@ -25,9 +25,38 @@
         </nav>
 
         <div class="auth-buttons">
-          <router-link to="/login" class="btn-login">Pierakstīties</router-link>
-          <router-link to="/signup" class="btn-signup">Reģistrējieties</router-link>
+          <template v-if="userLoggedIn">
+            <button @click="toggleNotificationPanel" class="btn-notification">
+              Paziņojumi
+              <span v-if="unreadNotifications" class="notification-badge">{{ unreadNotifications }}</span>
+            </button>
+            <router-link to="/account" class="btn-account">Mans konts</router-link>
+          </template>
+          <template v-else>
+            <router-link to="/login" class="btn-login">Pierakstīties</router-link>
+            <router-link to="/signup" class="btn-signup">Reģistrējieties</router-link>
+          </template>
           <router-link to="/admin-login" class="btn-admin">Admin</router-link>
+        </div>
+      </div>
+
+      <div v-if="showNotificationPanel" class="notification-dropdown">
+        <div class="notification-dropdown-header">
+          <strong>Administratora paziņojumi</strong>
+          <button @click="closeNotificationPanel" class="close-dropdown">×</button>
+        </div>
+        <div v-if="notificationList.length === 0" class="dropdown-empty">
+          Nav jaunu paziņojumu
+        </div>
+        <div v-else class="dropdown-items">
+          <div v-for="notification in notificationList" :key="notification.id" class="dropdown-item">
+            <p class="dropdown-message">{{ notification.message }}</p>
+            <p class="dropdown-meta">
+              <span>{{ notification.status === 'approved' ? 'Apstiprināts' : 'Noraidīts' }}</span>
+              •
+              <span>{{ formatDropdownDate(notification.moderatedAt || notification.approvedAt || notification.sentAt) }}</span>
+            </p>
+          </div>
         </div>
       </div>
     </header>
@@ -36,7 +65,7 @@
 
     <footer>
       <div class="container footer-wrap">
-        <div>© {{ currentYear }} Dzīvnieku adoptācijas centrs</div>
+        <div>© {{ currentYear }} LAIMĪGĀS ĶEPAS</div>
       </div>
     </footer>
   </div>
@@ -50,7 +79,36 @@ export default {
   data() {
     return {
       menuOpen: false,
-      currentYear: new Date().getFullYear()
+      currentYear: new Date().getFullYear(),
+      userLoggedIn: false,
+      unreadNotifications: 0,
+      showNotificationPanel: false
+    }
+  },
+  mounted() {
+    this.refreshAuthState()
+    this.refreshNotifications()
+    window.addEventListener('storage', this.onStorageChange)
+    window.addEventListener('contactMessagesUpdated', this.refreshNotifications)
+  },
+  beforeUnmount() {
+    window.removeEventListener('storage', this.onStorageChange)
+    window.removeEventListener('contactMessagesUpdated', this.refreshNotifications)
+  },
+  watch: {
+    $route() {
+      this.refreshAuthState()
+      this.refreshNotifications()
+    }
+  },
+  computed: {
+    notificationList() {
+      if (!this.userLoggedIn) return []
+      const email = this.getCurrentUserEmail()
+      const messages = JSON.parse(localStorage.getItem('contactMessages') || '[]')
+      return messages
+        .filter(message => message.email === email && ['approved', 'declined'].includes(message.status))
+        .sort((a, b) => new Date(b.moderatedAt || b.approvedAt || b.sentAt) - new Date(a.moderatedAt || a.approvedAt || a.sentAt))
     }
   },
   methods: {
@@ -59,6 +117,69 @@ export default {
     },
     closeMenu() {
       this.menuOpen = false
+    },
+    refreshAuthState() {
+      this.userLoggedIn = !!localStorage.getItem('userLoggedIn')
+    },
+    getCurrentUserEmail() {
+      return localStorage.getItem('userEmail') || ''
+    },
+    refreshNotifications() {
+      if (!this.userLoggedIn) {
+        this.unreadNotifications = 0
+        return
+      }
+      const email = this.getCurrentUserEmail()
+      const messages = JSON.parse(localStorage.getItem('contactMessages') || '[]')
+      this.unreadNotifications = messages.filter(message =>
+        message.email === email &&
+        ['approved', 'declined'].includes(message.status) &&
+        !message.read
+      ).length
+    },
+    onStorageChange(event) {
+      if (event.key === 'contactMessages') {
+        this.refreshNotifications()
+      }
+      if (event.key === 'userLoggedIn' || event.key === 'userEmail') {
+        this.refreshAuthState()
+      }
+    },
+    toggleNotificationPanel() {
+      this.showNotificationPanel = !this.showNotificationPanel
+      if (this.showNotificationPanel) {
+        this.refreshNotifications()
+      }
+    },
+    closeNotificationPanel() {
+      this.showNotificationPanel = false
+    },
+    logout() {
+      localStorage.removeItem('userLoggedIn')
+      localStorage.removeItem('userEmail')
+      this.userLoggedIn = false
+      this.closeMenu()
+      this.$router.push('/login')
+    },
+    formatDropdownDate(value) {
+      if (!value) return ''
+      return new Date(value).toLocaleString('lv-LV', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    },
+    goHome() {
+      this.closeMenu()
+      if (this.$route.path === '/') {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      } else {
+        this.$router.push('/').then(() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        })
+      }
     }
   }
 }
@@ -116,12 +237,30 @@ header {
   gap: 2rem;
 }
 
-.brand {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: var(--primary);
-  letter-spacing: 2px;
-  white-space: nowrap;
+.btn-notification {
+  padding: 10px 18px;
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--white);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  text-decoration: none;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.notification-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--white);
+  color: var(--dark-bg);
+  font-size: 0.85rem;
+  padding: 0 8px;
 }
 
 .hamburger {
@@ -209,6 +348,106 @@ header {
 .btn-admin:hover {
   background-color: rgba(255, 210, 63, 0.3);
   border-color: var(--secondary);
+}
+
+.btn-account {
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  border: 2px solid var(--primary);
+  font-size: 0.8rem;
+  color: var(--primary);
+  background-color: transparent;
+}
+
+.btn-account:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.btn-notification {
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  border: 2px solid var(--primary);
+  font-size: 0.8rem;
+  color: var(--white);
+  background-color: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-notification:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.notification-dropdown {
+  background: rgba(24, 24, 44, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  border-radius: 18px;
+  max-width: 420px;
+  width: calc(100% - 40px);
+  margin: 0 auto;
+  margin-top: 1rem;
+  padding: 1rem;
+  color: var(--white);
+}
+
+.notification-dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.8rem;
+}
+
+.notification-dropdown-header strong {
+  font-size: 1rem;
+}
+
+.close-dropdown {
+  background: transparent;
+  border: none;
+  color: var(--white);
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+.dropdown-empty {
+  padding: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.dropdown-items {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.dropdown-item {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 0.9rem;
+}
+
+.dropdown-message {
+  margin-bottom: 0.6rem;
+}
+
+.dropdown-meta {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 768px) {
+  .notification-dropdown {
+    width: 100%;
+    margin-top: 0.8rem;
+  }
 }
 
 .btn-login {

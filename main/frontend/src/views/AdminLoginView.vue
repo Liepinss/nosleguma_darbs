@@ -31,14 +31,14 @@ export default {
       password: '',
       message: '',
       messageType: '',
-      adminPassword: 'admin123' // Vienkārša admin parole (pēc tam var mainīt)
+      adminPassword: 'adminRVT' 
     }
   },
   methods: {
     handleAdminLogin() {
       if (this.password === this.adminPassword) {
         localStorage.setItem('adminLoggedIn', 'true')
-        this.message = 'Pierakstīšanās veiksmīga! Pāradresējot...'
+        this.message = 'Pierakstīšanās veiksmīga!'
         this.messageType = 'success'
         setTimeout(() => {
           this.$router.push('/admin')

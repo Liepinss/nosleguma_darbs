@@ -46,6 +46,7 @@
         </div>
         <button type="submit" class="btn-submit">Reģistrējieties</button>
       </form>
+      <p v-if="message" :class="messageType === 'success' ? 'success-message' : 'error-message'">{{ message }}</p>
       <p class="switch-form">
         Jau ir konts? <router-link to="/login">Pierakstieties</router-link>
       </p>
@@ -61,18 +62,40 @@ export default {
       name: '',
       email: '',
       password: '',
-      confirmPassword: ''
+      confirmPassword: '',
+      message: '',
+      messageType: ''
     }
   },
   methods: {
     handleSignup() {
       if (this.password !== this.confirmPassword) {
-        alert('Paroles nesakrīt!')
+        this.message = 'Paroles nesakrīt.'
+        this.messageType = 'error'
         return
       }
-      // Handle signup logic here
-      console.log('Signup:', { name: this.name, email: this.email, password: this.password })
-      // You can add API call here
+
+      const users = JSON.parse(localStorage.getItem('users') || '[]')
+      const exists = users.some(u => u.email === this.email)
+
+      if (exists) {
+        this.message = 'Šis e-pasts jau reģistrēts.'
+        this.messageType = 'error'
+        return
+      }
+
+      users.push({
+        name: this.name,
+        email: this.email,
+        password: this.password
+      })
+      localStorage.setItem('users', JSON.stringify(users))
+      this.message = 'Reģistrācija veiksmīga! Lūdzu, pieslēdzieties.'
+      this.messageType = 'success'
+
+      setTimeout(() => {
+        this.$router.push('/login')
+      }, 1000)
     }
   }
 }
@@ -96,11 +119,7 @@ export default {
   max-width: 400px;
   width: 100%;
 }
-.vards {
-  color: white;
-  text-align: flex-start;
-  background-color: white;
-}
+
 
 .signup-box h1 {
   text-align: center;
