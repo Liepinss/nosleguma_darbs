@@ -14,11 +14,11 @@
       <div class="account-body">
         <div class="account-info">
           <div class="info-row">
-            <span class="info-label">Vārds un uzvārds</span>
+            <span class="info-label">Vārds un uzvārds: </span>
             <span class="info-value">{{ name || 'Nav pieejams' }}</span>
           </div>
           <div class="info-row">
-            <span class="info-label">E-pasts</span>
+            <span class="info-label">E-pasts: </span>
             <span class="info-value">{{ email }}</span>
           </div>
           <div class="support-box">
