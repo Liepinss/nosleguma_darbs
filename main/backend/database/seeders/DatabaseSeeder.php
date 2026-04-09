@@ -15,11 +15,28 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $this->call(AnimalSeeder::class);
+        $this->call(TeamUserSeeder::class);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        /** Parole: "password" (User modelis to automātiski hashē). */
+        User::query()->updateOrCreate(
+            ['email' => 'demo@laimigas.lv'],
+            [
+                'name' => 'Demo lietotājs',
+                'password' => 'password',
+                'is_blocked' => false,
+                'is_admin' => false,
+            ]
+        );
+
+        User::query()->updateOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Test User',
+                'password' => 'password',
+                'is_blocked' => false,
+                'is_admin' => false,
+            ]
+        );
     }
 }

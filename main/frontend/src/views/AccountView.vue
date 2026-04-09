@@ -7,7 +7,7 @@
         </div>
         <div class="header-actions">
           
-          <button @click="logout" class="btn-account">Iziet</button>
+          <button type="button" @click="logout" class="btn-account-logout">Iziet</button>
         </div>
       </div>
 
@@ -21,12 +21,12 @@
             <span class="info-label">E-pasts: </span>
             <span class="info-value">{{ email }}</span>
           </div>
-          <div class="support-box">
-            <label class="support-label">Rakstiet support</label>
-            <textarea v-model="supportText" class="support-input" placeholder="Uzrakstiet savu jautājumu vai ziņu šeit..."></textarea>
-            <button class="btn-support" @click="sendSupportMessage">Sūtīt ziņu</button>
-            <p v-if="supportStatus" class="support-status">{{ supportStatus }}</p>
-          </div>
+          <p class="account-chat-hint">
+            Support čatu atver ar peldošo „Support” pogu lapas apakšējā labajā stūrī.
+          </p>
+          <p v-if="$route.query.noadmin === '1'" class="account-noadmin-note">
+            Administratora panelis jums nav pieejams. Ja nepieciešams, lūdziet administratoram piešķirt tiesības.
+          </p>
         </div>
 
         <div class="adoption-section">
@@ -47,12 +47,53 @@
 
           <p v-else class="no-adoption">Jums vēl nav izvēlēts dzīvnieks.</p>
         </div>
+
+        <div class="notifications-section">
+          <h2>Paziņojumi</h2>
+          <p v-if="!notifications.length" class="no-adoption">Nav paziņojumu.</p>
+          <div v-else class="notification-account-list">
+            <div
+              v-for="note in notifications"
+              :key="note.id"
+              class="notification-account-card"
+            >
+              <div class="notification-account-inner">
+                <div class="notification-account-body">
+                  <p class="notification-account-type">{{ notificationTitle(note) }}</p>
+                  <p class="notification-account-text">{{ note.message }}</p>
+                  <p class="notification-account-date">
+                    {{ formatDate(note.moderatedAt || note.approvedAt || note.sentAt) }}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  class="notification-delete-btn"
+                  title="Dzēst"
+                  aria-label="Dzēst paziņojumu"
+                  @click="deleteNotification(note.id)"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { getStoredUser, logoutUser } from '@/api/authApi'
+import {
+  deleteMyApplication,
+  fetchMyApplications,
+  fetchMyNotifications,
+  markMyNotificationsRead,
+} from '@/api/restApi'
+import { clearLoggedInUserIfBlocked, isUserLoggedIn } from '@/utils/authStorage'
+import { removeNotificationForUser } from '@/utils/contactMessages'
+
 export default {
   name: 'AccountView',
   data() {
@@ -60,91 +101,103 @@ export default {
       name: '',
       email: '',
       adoptions: [],
-      supportText: '',
-      supportStatus: '',
       notifications: [],
       showNotifications: false,
-      animalImages: {
-        1: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTglMbr5eE2rhr-f1qPDLurT4p5eT_f5OvlQQ&s',
-        2: 'https://upload.wikimedia.org/wikipedia/commons/6/6e/Golde33443.jpg',
-        3: 'https://upload.wikimedia.org/wikipedia/commons/7/74/A-Cat.jpg',
-        4: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTglMbr5eE2rhr-f1qPDLurT4p5eT_f5OvlQQ&s'
-      }
     }
   },
   mounted() {
-    const isLoggedIn = localStorage.getItem('userLoggedIn')
-    if (!isLoggedIn) {
-      this.$router.push('/login')
-      return
-    }
-    this.email = localStorage.getItem('userEmail') || ''
-    this.name = localStorage.getItem('userName') || ''
-
-    if (!this.name && this.email) {
-      const users = JSON.parse(localStorage.getItem('users') || '[]')
-      const user = users.find(u => u.email === this.email)
-      if (user && user.name) {
-        this.name = user.name
-        localStorage.setItem('userName', user.name)
-      }
-    }
-
-    this.loadAdoptions()
-    this.loadNotifications()
+    void this.boot()
     window.addEventListener('storage', this.onStorageChange)
+    window.addEventListener('contactMessagesUpdated', this.loadNotifications)
+    window.addEventListener('authUpdated', this.onAuthUpdated)
   },
   beforeUnmount() {
     window.removeEventListener('storage', this.onStorageChange)
+    window.removeEventListener('contactMessagesUpdated', this.loadNotifications)
+    window.removeEventListener('authUpdated', this.onAuthUpdated)
   },
   computed: {
     unreadNotifications() {
-      return this.notifications.filter(note => !note.read).length
-    }
+      return this.notifications.filter((note) => !note.read).length
+    },
   },
   methods: {
-    loadAdoptions() {
-      const adoptions = JSON.parse(localStorage.getItem('adoptions') || '[]')
-      this.adoptions = adoptions
-        .filter(adoption => adoption.email === this.email)
-        .map(adoption => ({
-          ...adoption,
-          animalImage: adoption.animalImage || this.getAnimalImageById(adoption.animalId)
-        }))
+    async boot() {
+      if (!isUserLoggedIn()) {
+        this.$router.push('/login')
+        return
+      }
+      if (await clearLoggedInUserIfBlocked()) {
+        this.$router.push({ path: '/login', query: { blocked: '1' } })
+        return
+      }
+      this.syncProfileFromStore()
+      await this.loadAdoptions()
+      await this.loadNotifications()
     },
-    loadNotifications() {
-      const messages = JSON.parse(localStorage.getItem('contactMessages') || '[]')
-      this.notifications = messages.filter(
-        message => message.email === this.email && message.status === 'approved'
-      )
+    onAuthUpdated() {
+      this.syncProfileFromStore()
+    },
+    syncProfileFromStore() {
+      const u = getStoredUser()
+      this.email = u?.email || ''
+      this.name = u?.name || ''
+    },
+    async loadAdoptions() {
+      try {
+        const rows = await fetchMyApplications()
+        this.adoptions = rows.map((adoption) => ({
+          ...adoption,
+          animalImage:
+            adoption.animalImage ||
+            'https://via.placeholder.com/180?text=Dzīvnieks',
+        }))
+      } catch {
+        this.adoptions = []
+      }
+    },
+    async loadNotifications() {
+      try {
+        const messages = await fetchMyNotifications()
+        this.notifications = messages
+          .filter((message) => message.status === 'approved')
+          .sort(
+            (a, b) =>
+              new Date(b.moderatedAt || b.approvedAt || b.sentAt) -
+              new Date(a.moderatedAt || a.approvedAt || a.sentAt),
+          )
+      } catch {
+        this.notifications = []
+      }
+    },
+    notificationTitle(note) {
+      if (note.source === 'admin_role_grant') {
+        return 'Administratora piekļuve'
+      }
+      return 'Ziņojums no administrācijas'
     },
     onStorageChange(event) {
-      if (event.key === 'contactMessages') {
-        this.loadNotifications()
+      if (event.key === 'spa_auth_token' || event.key === 'spa_auth_user') {
+        void this.boot()
       }
     },
     toggleNotifications() {
       this.showNotifications = !this.showNotifications
       if (this.showNotifications) {
-        this.markNotificationsRead()
+        void this.markNotificationsRead()
       }
     },
-    deleteNotification(id) {
-      const messages = JSON.parse(localStorage.getItem('contactMessages') || '[]')
-      const updated = messages.filter(message => message.id !== id)
-      localStorage.setItem('contactMessages', JSON.stringify(updated))
-      this.loadNotifications()
+    async deleteNotification(id) {
+      await removeNotificationForUser(id)
+      await this.loadNotifications()
     },
-    markNotificationsRead() {
-      const messages = JSON.parse(localStorage.getItem('contactMessages') || '[]')
-      const updated = messages.map(message => {
-        if (message.email === this.email && message.status === 'approved' && !message.read) {
-          return { ...message, read: true }
-        }
-        return message
-      })
-      localStorage.setItem('contactMessages', JSON.stringify(updated))
-      this.loadNotifications()
+    async markNotificationsRead() {
+      try {
+        await markMyNotificationsRead()
+        await this.loadNotifications()
+      } catch {
+        /* ignore */
+      }
     },
     formatDate(value) {
       if (!value) return ''
@@ -153,281 +206,225 @@ export default {
         month: 'long',
         day: 'numeric',
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
       })
     },
-    getAnimalImageById(animalId) {
-      return this.animalImages[animalId] || 'https://via.placeholder.com/180?text=Dzīvnieks'
-    },
-    sendSupportMessage() {
-      if (!this.supportText.trim()) {
-        this.supportStatus = 'Lūdzu, ierakstiet savu ziņu.'
-        return
+    async releaseAdoption(adoptionId) {
+      try {
+        await deleteMyApplication(adoptionId)
+        await this.loadAdoptions()
+      } catch {
+        /* ignore */
       }
-
-      const messages = JSON.parse(localStorage.getItem('contactMessages') || '[]')
-      messages.push({
-        id: Date.now(),
-        name: this.name || 'Nezināms',
-        email: this.email || 'Nav e-pasta',
-        message: this.supportText,
-        selectedAnimals: this.adoptions.map(a => a.animalName).join(', ') || 'Nav izvēlēts dzīvnieks',
-        sentAt: new Date().toISOString(),
-        source: 'support',
-        status: 'pending',
-        read: false
-      })
-      localStorage.setItem('contactMessages', JSON.stringify(messages))
-      this.supportText = ''
-      this.supportStatus = 'Ziņa nosūtīta veiksmīgi. Admins to redzēs.'
-      setTimeout(() => {
-        this.supportStatus = ''
-      }, 4000)
     },
-    releaseAdoption(adoptionId) {
-      const adoptions = JSON.parse(localStorage.getItem('adoptions') || '[]')
-      const updated = adoptions.filter(adoption => adoption.id !== adoptionId)
-      localStorage.setItem('adoptions', JSON.stringify(updated))
-      this.adoptions = this.adoptions.filter(adoption => adoption.id !== adoptionId)
-    },
-    logout() {
-      localStorage.removeItem('userLoggedIn')
-      localStorage.removeItem('userEmail')
-      localStorage.removeItem('userName')
+    async logout() {
+      await logoutUser()
+      window.dispatchEvent(new Event('authUpdated'))
       this.$router.push('/login')
-    }
-  }
+    },
+  },
 }
 </script>
 
 <style scoped>
 .account-container {
-  min-height: 100vh;
+  flex: 1;
   display: flex;
   justify-content: center;
-  align-items: center;
-  background: linear-gradient(135deg, #1A1A2E, #16213E);
-  padding: 20px;
+  align-items: flex-start;
+  padding: clamp(1.25rem, 3vw, 2rem) 20px 3rem;
+  background:
+    radial-gradient(ellipse 70% 45% at 50% 0%, rgba(120, 45, 30, 0.35), transparent 55%),
+    linear-gradient(168deg, #0c0d12 0%, #0a0a0c 100%);
 }
 
 .account-box {
-  background: linear-gradient(135deg, #FF6B35, #FFD23F);
-  padding: 40px;
-  border-radius: 30px;
-  box-shadow: 0 10px 30px rgba(255, 107, 53, 0.5);
-  max-width: 900px;
   width: 100%;
+  max-width: 920px;
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  border-radius: 24px;
+  background: linear-gradient(165deg, #161a22 0%, #0e1118 100%);
+  border: 1px solid var(--hp-line-strong, rgba(255, 255, 255, 0.18));
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
 }
 
 .account-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 20px;
-  margin-bottom: 30px;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
 }
 
 .account-header h1 {
-  color: white;
-  margin: 0;
-  font-size: 2.2rem;
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.btn-notification {
-  padding: 10px 18px;
-  background: rgba(255, 255, 255, 0.12);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 16px;
-  cursor: pointer;
-  font-weight: 700;
-}
-
-.notification-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 24px;
-  height: 24px;
-  border-radius: 999px;
-  background: #1A1A2E;
-  color: #FFD23F;
-  margin-left: 10px;
-  font-size: 0.85rem;
-}
-
-.notification-panel {
-  margin-top: 25px;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.14);
-  border-radius: 20px;
-}
-
-.notification-item {
-  padding: 14px 16px;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  margin-bottom: 12px;
-}
-
-.notification-meta {
-  color: rgba(255, 255, 255, 0.75);
-  font-size: 0.9rem;
-  margin-top: 8px;
-}
-
-.user-email {
-  color: rgba(255, 255, 255, 0.85);
-  margin-top: 8px;
-  display: block;
-}
-
-.user-name {
-  color: rgba(255, 255, 255, 0.95);
-  margin-top: 8px;
-  display: block;
-  font-size: 1.05rem;
+  font-family: 'Playfair Display', Georgia, serif;
+  color: var(--hp-text, #f4f4f5);
+  font-size: clamp(1.5rem, 3vw, 2rem);
   font-weight: 600;
 }
 
+.btn-account-logout {
+  padding: 0.5rem 1.15rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  border: 1.5px solid rgba(248, 113, 113, 0.45);
+  background: transparent;
+  color: #fecaca;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.btn-account-logout:hover {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: #f87171;
+}
+
 .account-body {
-  display: grid;
-  gap: 30px;
+  color: var(--hp-muted, rgba(255, 255, 255, 0.7));
 }
 
-@media (min-width: 920px) {
-  .account-body {
-    grid-template-columns: 1fr 1.1fr;
-    align-items: start;
-  }
+.info-row {
+  margin-bottom: 0.65rem;
+  font-size: 1rem;
+  color: var(--hp-text, #f4f4f5);
 }
 
-.account-info {
-  display: grid;
-  gap: 15px;
-  padding: 25px;
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 20px;
+.info-label {
+  color: var(--hp-muted, rgba(255, 255, 255, 0.7));
 }
 
-.support-box {
-  display: grid;
-  gap: 12px;
-  margin-top: 10px;
-}
-
-.support-label {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.95rem;
-}
-
-.support-input {
-  width: 100%;
-  min-height: 120px;
-  padding: 16px;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  background: rgba(255, 255, 255, 0.12);
-  color: white;
-  resize: vertical;
-}
-
-.support-note {
-  color: rgba(255, 255, 255, 0.7);
+.account-chat-hint {
+  margin-top: 1.25rem;
   font-size: 0.9rem;
-  line-height: 1.4;
+  line-height: 1.45;
+  color: var(--hp-muted, rgba(255, 255, 255, 0.7));
 }
 
-.info-value {
-  color: white;
-  font-size: 1.1rem;
-  margin-top: 6px;
+.account-noadmin-note {
+  margin-top: 0.85rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  background: rgba(245, 204, 76, 0.1);
+  border: 1px solid rgba(245, 204, 76, 0.25);
+  color: var(--hp-gold, #f5cc4c);
+  font-size: 0.88rem;
+  line-height: 1.45;
 }
 
-.adoption-section h2 {
-  color: white;
-  margin-bottom: 20px;
+.adoption-section,
+.notifications-section {
+  margin-top: 2rem;
+}
+
+.adoption-section h2,
+.notifications-section h2 {
+  font-family: 'Playfair Display', Georgia, serif;
+  color: var(--hp-gold, #f5cc4c);
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  font-weight: 600;
 }
 
 .adoption-list {
-  display: grid;
-  gap: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .adoption-card {
   display: flex;
-  gap: 20px;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 20px;
-  overflow: hidden;
-}
-
-.animal-image {
-  flex: 0 0 180px;
-  min-width: 180px;
-  height: 180px;
-}
-
-.animal-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.animal-details {
-  padding: 20px;
-  color: white;
-  flex: 1;
+  gap: 1rem;
+  flex-wrap: wrap;
+  background: var(--hp-surface, rgba(255, 255, 255, 0.055));
+  border: 1px solid var(--hp-line, rgba(255, 255, 255, 0.1));
+  padding: 1rem;
+  border-radius: 16px;
 }
 
 .animal-details h3 {
-  margin: 0 0 12px;
+  color: var(--hp-text, #f4f4f5);
+  margin-bottom: 0.35rem;
 }
 
 .animal-details p {
-  margin: 8px 0;
+  color: var(--hp-muted, rgba(255, 255, 255, 0.7));
+  font-size: 0.92rem;
+}
+
+.animal-image img {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid var(--hp-line, rgba(255, 255, 255, 0.1));
 }
 
 .btn-release {
-  padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.15);
-  color: white;
-  font-weight: bold;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 12px;
+  margin-top: 0.65rem;
+  padding: 0.45rem 1rem;
+  background: rgba(239, 68, 68, 0.15);
+  color: #fecaca;
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  border-radius: 999px;
   cursor: pointer;
-  transition: background 0.3s ease, border-color 0.3s ease;
-  margin-top: 16px;
-}
-
-.btn-release:hover {
-  background: rgba(255, 255, 255, 0.25);
-  border-color: white;
-}
-
-.btn-support {
-  width: 100%;
-  padding: 14px 18px;
-  margin-top: 25px;
-  background: white;
-  color: #1A1A2E;
   font-weight: 700;
-  border: none;
-  border-radius: 16px;
-  cursor: pointer;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  font-size: 0.85rem;
 }
 
-.btn-support:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
+.no-adoption {
+  color: var(--hp-muted, rgba(255, 255, 255, 0.7));
+}
+
+.notification-account-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.notification-account-card {
+  background: var(--hp-surface, rgba(255, 255, 255, 0.055));
+  border: 1px solid var(--hp-line, rgba(255, 255, 255, 0.1));
+  border-radius: 14px;
+  padding: 0.85rem;
+}
+
+.notification-account-inner {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.notification-account-type {
+  color: var(--hp-gold, #f5cc4c);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.notification-account-text {
+  color: var(--hp-text, #f4f4f5);
+  margin: 0.35rem 0;
+}
+
+.notification-account-date {
+  color: var(--hp-muted, rgba(255, 255, 255, 0.7));
+  font-size: 0.82rem;
+}
+
+.notification-delete-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  line-height: 1;
+  color: var(--hp-muted, rgba(255, 255, 255, 0.7));
+  padding: 0.15rem;
+}
+
+.notification-delete-btn:hover {
+  color: #fecaca;
 }
 </style>

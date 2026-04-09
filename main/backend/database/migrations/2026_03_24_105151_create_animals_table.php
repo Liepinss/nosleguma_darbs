@@ -14,11 +14,13 @@ return new class extends Migration
         Schema::create('animals', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->integer('age');
+            $table->string('species')->default('Cits');
+            $table->string('gender')->nullable();
+            $table->integer('age')->nullable();
             $table->text('description');
             $table->string('image')->nullable();
 
-            $table->foreignId('category_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('category_id')->nullable()->constrained()->nullOnDelete();
 
             $table->timestamps();
         });

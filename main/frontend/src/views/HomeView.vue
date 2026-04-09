@@ -1,166 +1,391 @@
 <template>
-  <div id="start" class="home">
+  <div id="start" class="home home-premium">
 
-    <section class="hero">
-      <div class="container">
-        <h1 class="hero-title">Dzīvnieku adoptācijas centrs</h1>
-        <p class="hero-subtitle">Dod mājas tiem, kam tās vajag</p>
-
-        <div class="hero-img">
-          <img
-            src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b"
-            alt="animals"
-          />
+    <section class="hp-hero" aria-labelledby="hero-heading">
+      <div class="hp-hero__mesh" aria-hidden="true" />
+      <div class="container hp-hero__inner">
+        <div class="hp-hero__copy">
+          <p class="hp-hero__eyebrow">Laimīgās Ķepas · adopcijas centrs</p>
+          <h1 id="hero-heading" class="hp-hero__title">
+            <span class="hp-hero__title-line">Katrai ķepai —</span>
+            <span class="hp-hero__title-script">savas mājas</span>
+          </h1>
+          <p class="hp-hero__lead">
+            Mēs savienojam pamestos un neaprūpētos dzīvniekus ar ģimenēm, kas gatavas mīlestībai. Katrs profils ir īsts — dati tiešā veidā no mūsu sistēmas.
+          </p>
+          <div class="hp-hero__actions">
+            <button type="button" class="hp-btn hp-btn--primary hp-hero__btn" @click.prevent="scrollToSection('animals')">
+              Izvēlēties draugu
+            </button>
+            <button type="button" class="hp-btn hp-btn--ghost hp-hero__btn hp-hero__btn--ghost" @click.prevent="scrollToSection('how')">
+              Kā tas darbojas
+            </button>
+          </div>
+          <div v-if="stats" class="hp-statbar hp-statbar--hero" role="list">
+            <div class="hp-statbar__cell" role="listitem">
+              <span class="hp-statbar__num">{{ stats.animals_available }}</span>
+              <span class="hp-statbar__lbl">gaida mājas</span>
+            </div>
+            <div class="hp-statbar__cell" role="listitem">
+              <span class="hp-statbar__num">{{ stats.animals_total }}</span>
+              <span class="hp-statbar__lbl">kopā aprūpē</span>
+            </div>
+            <div class="hp-statbar__cell" role="listitem">
+              <span class="hp-statbar__num">{{ stats.adoption_applications_total }}</span>
+              <span class="hp-statbar__lbl">pieteikumi</span>
+            </div>
+            <div class="hp-statbar__cell" role="listitem">
+              <span class="hp-statbar__num">{{ stats.registered_users_total }}</span>
+              <span class="hp-statbar__lbl">kopienas biedri</span>
+            </div>
+          </div>
+          <div v-else-if="statsLoading" class="hp-statbar hp-statbar--hero hp-statbar--skel" aria-hidden="true">
+            <div v-for="n in 4" :key="n" class="hp-statbar__skel" />
+          </div>
+        </div>
+        <div class="hp-hero__media">
+          <figure class="hp-hero__visual">
+            <img
+              src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=1100&q=85"
+              alt="Suni laukā — draudzīgi un gatavi jaunām mājām"
+              width="1100"
+              height="733"
+              loading="eager"
+              decoding="async"
+            />
+            <figcaption class="hp-hero__caption">
+              <strong>Īsta aprūpe</strong>
+              <span>Veterinārā kontrole · sociālā adaptācija</span>
+            </figcaption>
+          </figure>
         </div>
       </div>
     </section>
 
-    <!-- DZĪVNIEKU SEKCIJA -->
-    <section class="animals-section" id="animals">
-      <div class="container">
-        <h2 class="section-title">Pieejamie dzīvnieki</h2>
+    <section class="hp-trust" aria-label="Iemesli uzticēties">
+      <div class="container hp-trust__grid">
+        <article class="hp-trust__card">
+          <div class="hp-trust__icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M24 4L8 12v12c0 11 7 20 16 22 9-2 16-11 16-22V12L24 4z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" />
+              <path d="M18 24l4 4 8-10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </div>
+          <h3 class="hp-trust__title">Drošība</h3>
+          <p class="hp-trust__text">Veselības pārbaude, vakcinācija un uzraudzība pirms došanās jaunajās mājās.</p>
+        </article>
+        <article class="hp-trust__card">
+          <div class="hp-trust__icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 22c0-8 6-14 16-14s16 6 16 14c0 10-10 18-16 22-6-4-16-12-16-22z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" />
+              <circle cx="24" cy="22" r="5" stroke="currentColor" stroke-width="2.2" />
+            </svg>
+          </div>
+          <h3 class="hp-trust__title">Atbilstība</h3>
+          <p class="hp-trust__text">Izvērtējam dzīves apstākļus un pieredzi, lai sakristu gan cilvēkam, gan dzīvniekam.</p>
+        </article>
+        <article class="hp-trust__card">
+          <div class="hp-trust__icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 20h10l4-12 6 28 4-16h12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </div>
+          <h3 class="hp-trust__title">Atbalsts</h3>
+          <p class="hp-trust__text">Palīdzam arī pēc adopcijas — jautājumi un konsultācijas paliek pieejamas.</p>
+        </article>
+      </div>
+    </section>
 
-        <!-- Search Bar -->
-        <div class="search-container">
-          <div class="search-field">
-            <span class="search-icon"></span>
-            <input 
-              v-model="searchQuery" 
-              type="text" 
-              placeholder="Meklēt dzīvnieku pēc vārda, dzimuma vai apraksta..."
-              class="search-bar"
+    <section id="how" class="hp-steps">
+      <div class="container">
+        <header class="hp-sechead">
+          <p class="hp-sechead__eyebrow">Process</p>
+          <h2 class="hp-sechead__title">No pirmā skatiena līdz kopīgam mājas sofā</h2>
+        </header>
+        <ol class="hp-steps__list">
+          <li class="hp-steps__item">
+            <span class="hp-steps__bubble">01</span>
+            <h3 class="hp-steps__name">Iepazīsties</h3>
+            <p class="hp-steps__desc">Profili un foto no mūsu datubāzes — meklē pēc sugas un noskaņas.</p>
+          </li>
+          <li class="hp-steps__item">
+            <span class="hp-steps__bubble">02</span>
+            <h3 class="hp-steps__name">Konts</h3>
+            <p class="hp-steps__desc">Reģistrējies un pieslēdzies, lai iesniegtu adopcijas pieteikumu.</p>
+          </li>
+          <li class="hp-steps__item">
+            <span class="hp-steps__bubble">03</span>
+            <h3 class="hp-steps__name">Saruna</h3>
+            <p class="hp-steps__desc">Izrunājam jautājumus un piemērotību — pierakstījušies var rakstīt support čatā; citādi arī pa tālruni un e-pastu.</p>
+          </li>
+          <li class="hp-steps__item">
+            <span class="hp-steps__bubble">04</span>
+            <h3 class="hp-steps__name">Mājas</h3>
+            <p class="hp-steps__desc">Satikšanās un jaunā ģimene. Pēcadopcijas atbalsts pieejams.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section v-if="spotlightAnimals.length" class="hp-spotlight">
+      <div class="container">
+        <header class="hp-sechead hp-sechead--row">
+          <div>
+            <p class="hp-sechead__eyebrow">Šobrīd gaida</p>
+            <h2 class="hp-sechead__title">Izceltie draugi</h2>
+          </div>
+          <button type="button" class="hp-btn hp-btn--ghost hp-btn--sm" @click.prevent="scrollToSection('animals')">
+            Skatīt visus
+          </button>
+        </header>
+        <div class="hp-spotlight__row">
+          <button
+            v-for="animal in spotlightAnimals"
+            :key="animal.id"
+            type="button"
+            class="hp-spot"
+            @click="openModal(animal)"
+          >
+            <span class="hp-spot__img">
+              <img :src="animal.image" :alt="animal.name" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+            </span>
+            <span class="hp-spot__meta">
+              <span class="hp-spot__species">{{ animal.species }}</span>
+              <span class="hp-spot__name">{{ animal.name }}</span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="hp-catalog" id="animals">
+      <div class="container">
+        <header class="hp-sechead">
+          <p class="hp-sechead__eyebrow">Katalogs</p>
+          <h2 class="hp-sechead__title">Meklē savu ķepu</h2>
+          <p class="hp-sechead__sub">
+            Saraksts un pieejamība atjaunojas no servera reāllaikā.
+          </p>
+        </header>
+
+        <div class="hp-search">
+          <div class="hp-search__field">
+            <svg class="hp-search__glass" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="10" cy="10" r="6.5" stroke="currentColor" stroke-width="2" />
+              <path d="M15 15l6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
+            <input
+              v-model="searchQuery"
+              type="search"
+              class="hp-search__input"
+              placeholder="Meklēt pēc vārda, apraksta, dzimuma…"
+              autocomplete="off"
             />
           </div>
-
-          <div class="select-wrapper">
-            <label class="filter-label"></label>
-            <select v-model="selectedSpecies" class="animal-select">
-              <option value="">Visi dzīvnieki</option>
-              <option v-for="species in speciesOptions" :key="species" :value="species">
-                {{ species }}
-              </option>
-            </select>
+          <div
+            ref="speciesFilterRoot"
+            class="hp-search__select hp-species-dd"
+            :class="{ 'hp-species-dd--open': speciesDropdownOpen }"
+          >
+            <span id="species-filter-label" class="visually-hidden">Filtrēt pēc sugas</span>
+            <button
+              id="species-filter-trigger"
+              type="button"
+              class="hp-species-dd__trigger"
+              :aria-expanded="speciesDropdownOpen"
+              aria-haspopup="listbox"
+              aria-controls="species-filter-listbox"
+              @click="toggleSpeciesDropdown"
+              @keydown.escape.prevent="closeSpeciesDropdown"
+            >
+              <span class="hp-species-dd__trigger-inner">
+                <span class="hp-species-dd__icon" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M12 5c1.2-2.2 4-2.2 5.2 0 1.1 2 0 4.5-1.8 5.8-.9.4-1.8.6-2.7.6h-.8c-.9 0-1.8-.2-2.7-.6-1.8-.8-2.9-3.3-1.8-5.8z"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M8.5 14.5c-1.8 1-3 2.8-3.2 5H4v3h16v-3h-1.3c-.2-2.2-1.4-4-3.2-5"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </span>
+                <span class="hp-species-dd__label">
+                  <span class="hp-species-dd__label-k">Suga</span>
+                  <span class="hp-species-dd__label-v">{{ speciesFilterLabel }}</span>
+                </span>
+              </span>
+              <span class="hp-species-dd__chev" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M6 9l6 6 6-6"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </span>
+            </button>
+            <Transition name="hp-species-dd">
+              <ul
+                v-show="speciesDropdownOpen"
+                id="species-filter-listbox"
+                class="hp-species-dd__menu"
+                role="listbox"
+                aria-labelledby="species-filter-label"
+              >
+                <li role="none">
+                  <button
+                    type="button"
+                    class="hp-species-dd__opt"
+                    :class="{ 'hp-species-dd__opt--active': !selectedSpecies }"
+                    role="option"
+                    :aria-selected="!selectedSpecies"
+                    @click="selectSpecies('')"
+                  >
+                    <span class="hp-species-dd__opt-main">
+                      <span class="hp-species-dd__opt-title">Visas sugas</span>
+                      <span class="hp-species-dd__pill">{{ animals.length }}</span>
+                    </span>
+                    <span v-if="!selectedSpecies" class="hp-species-dd__check" aria-hidden="true">✓</span>
+                  </button>
+                </li>
+                <li v-for="sp in sortedSpeciesOptions" :key="sp" role="none">
+                  <button
+                    type="button"
+                    class="hp-species-dd__opt"
+                    :class="{ 'hp-species-dd__opt--active': selectedSpecies === sp }"
+                    role="option"
+                    :aria-selected="selectedSpecies === sp"
+                    @click="selectSpecies(sp)"
+                  >
+                    <span class="hp-species-dd__opt-main">
+                      <span class="hp-species-dd__opt-title">{{ sp }}</span>
+                      <span class="hp-species-dd__pill">{{ countBySpecies(sp) }}</span>
+                    </span>
+                    <span v-if="selectedSpecies === sp" class="hp-species-dd__check" aria-hidden="true">✓</span>
+                  </button>
+                </li>
+              </ul>
+            </Transition>
           </div>
         </div>
 
-        <div class="cards">
+        <div class="hp-grid">
           <article
             v-for="animal in filteredAnimals"
             :key="animal.id"
-            class="card"
+            class="hp-card"
           >
-
-            <div class="card-img">
-              <img :src="animal.image" />
-              <div v-if="isTaken(animal.id)" class="status-badge">Aizņemts</div>
+            <div class="hp-card__media">
+              <img
+                :src="animal.image"
+                :alt="animal.name"
+                loading="lazy"
+                decoding="async"
+                referrerpolicy="no-referrer"
+              />
+              <div v-if="isTaken(animal.id)" class="hp-card__ribbon">Rezervēts</div>
             </div>
-
-            <div class="card-body">
-              <h3>{{ animal.name }}</h3>
-              <p>{{ animal.description }}</p>
-              <p><strong>Dzimums:</strong> {{ animal.gender }}</p>
-
+            <div class="hp-card__body">
+              <p class="hp-card__species">{{ animal.species }}</p>
+              <h3 class="hp-card__name">{{ animal.name }}</h3>
+              <p class="hp-card__desc">{{ animal.description }}</p>
+              <p class="hp-card__meta"><span>Dzimums</span> {{ animal.gender || '—' }}</p>
               <button
-                class="btn"
-                @click="openModal(animal)"
+                type="button"
+                class="hp-btn hp-btn--card"
                 :disabled="isTaken(animal.id)"
+                @click="openModal(animal)"
               >
-                {{ isTaken(animal.id) ? 'Aizņemts' : 'Skatīt vairāk' }}
+                {{ isTaken(animal.id) ? 'Aizņemts' : 'Atvērt profilu' }}
               </button>
-
             </div>
-
           </article>
-
         </div>
       </div>
     </section>
 
-    <!-- PAR SEKCIJU -->
-    <section class="about-section" id="about">
-      <div class="container">
-        <h2 class="section-title">Par mums</h2>
+    <section class="hp-quote" aria-label="Atsauksme">
+      <div class="hp-quote__deco" aria-hidden="true">“</div>
+      <div class="container hp-quote__inner">
+        <blockquote class="hp-quote__text">
+          Adopcija nav pirkums — tā ir solījums. Paldies komandai par pacietību un skaidro procesu; mūsu suns jau ir mājas sirds.
+        </blockquote>
+        <cite class="hp-quote__cite">— adoptētāju ģimene, Rīga</cite>
+      </div>
+    </section>
 
-        <div class="about-content">
-          <div class="about-text">
-            <p>
-              Mēs esam <strong>Dzīvnieku Adoptācijas Centrs</strong>, kas veltīts pamesto un vardarbīgi apkalpoto dzīvnieku glābšanai un aprūpei.
-            </p>
-            <p>
-              Mūsu misija ir atrast mīļas un draudzīgas mājas katram dzīvniekam, kas nonāk mūsu centrā. Mēs ticam, ka katrs dzīvnieks ir vērts mīlestības un aprūpes.
-            </p>
-            <h3>Mūsu pakalpojumi:</h3>
-            <ul class="services-list">
-              <li>✓ Draudzīga un droša vide dzīvniekiem</li>
-              <li>✓ Veterinārā aprūpe un vakcinācija</li>
-              <li>✓ Personīga mācīšana un socializācija</li>
-              <li>✓ Pēcadopcijas atbalsts un konsultācijas</li>
-            </ul>
-            <p>
-              Ja jūs meklējat jaunu draudzīgu biedru savai ģimenei, mūs lūdzam apmeklēt mūsu adoptācijas centru un iepazīties ar mūsu brīnumainajiem dzīvniekiem!
-            </p>
+    <section class="hp-about" id="about">
+      <div class="container hp-about__layout">
+        <div class="hp-about__visual">
+          <div class="hp-about__frame">
+            <img
+              src="https://images.unsplash.com/photo-1601758228041-f3b2795255f1?auto=format&fit=crop&w=900&q=85"
+              alt="Suns un saimnieks"
+              loading="lazy"
+              width="900"
+              height="1125"
+            />
           </div>
+        </div>
+        <div class="hp-about__content">
+          <header class="hp-sechead hp-sechead--left">
+            <p class="hp-sechead__eyebrow">Par mums</p>
+            <h2 class="hp-sechead__title">Cieņa pret katru dzīvību</h2>
+          </header>
+          <p class="hp-about__lead">
+            <strong>Laimīgās Ķepas</strong> ir vieta, kur dzīvnieki atgūst uzticību. Strādājam ar veterināriem un brīvprātīgajiem, lai katrs būtu vesels un emocionāli gatavs jaunajām mājām.
+          </p>
+          <ul class="hp-about__ticks">
+            <li>Strukturēta, mierīga vide</li>
+            <li>Vakcinācija un veselības uzraudzība</li>
+            <li>Socializācija un pozitīva stimulācija</li>
+            <li>Pēcadopcijas konsultācijas</li>
+          </ul>
         </div>
       </div>
     </section>
 
-    <!-- KONATKTU SEKCIJA -->
-    <section class="contact-section" id="contact">
-      <div class="container">
-        <h2 class="section-title">Kontakti</h2>
-
-        <div class="contact-content">
-          <div class="contact-info">
-            <div class="contact-item">
-              <h3>📍 Adrese</h3>
-              <p>Dzīvnieku Adoptācijas Centrs<br>Torņukalns, Mārupes iela 19, Rīga, LV-1002<br>Latvija</p>
+    <section class="hp-contact" id="contact">
+      <div class="container hp-contact__grid">
+        <div class="hp-contact__aside">
+          <header class="hp-sechead hp-sechead--left">
+            <p class="hp-sechead__eyebrow">Sazinies</p>
+            <h2 class="hp-sechead__title">Jautājumi pirms adopcijas?</h2>
+            <p class="hp-sechead__sub">
+              <template v-if="userLoggedIn">
+                Pierakstījušies lietotāji var rakstīt komandai, izmantojot peldošo „Support” pogu lapas apakšējā labajā stūrī.
+              </template>
+              <template v-else>
+                Pierakstieties, lai atvērtu tiešu support čatu ar komandu. Tālāk arī tālrunis un e-pasts.
+              </template>
+            </p>
+          </header>
+          <div class="hp-contact__tiles">
+            <div class="hp-contact__tile">
+              <h3>Adrese</h3>
+              <p>Torņukalns, Mārupes iela 19<br>Rīga, LV-1002</p>
             </div>
-            <div class="contact-item">
-              <h3>📞 Telefons</h3>
-              <p>+371 29 316 942</p>
+            <div class="hp-contact__tile">
+              <h3>Tālrunis</h3>
+              <p><a href="tel:+37129316942">+371 29 316 942</a></p>
             </div>
-            <div class="contact-item">
-              <h3>📧 E-pasts</h3>
-              <p><a href="mailto:kontakti@dzivniekucentrs.lv">Adoptācijascentrs@gamil.com</a></p>
+            <div class="hp-contact__tile">
+              <h3>E-pasts</h3>
+              <p><a href="mailto:kontakti@dzivniekucentrs.lv">kontakti@dzivniekucentrs.lv</a></p>
             </div>
-            <div class="contact-item">
-              <h3>🕐 Darba laiks</h3>
-              <p>Pirmdiena - Piektdiena: 10:00 - 18:00<br>
-                Sestdiena: 10:00 - 16:00<br>
-                Svētdiena: Slēgts</p>
+            <div class="hp-contact__tile">
+              <h3>Darba laiks</h3>
+              <p>Pk–Pt 10:00–18:00 · Sb 10:00–16:00 · Sv slēgts</p>
             </div>
-          </div>
-
-          <div class="contact-form">
-            <h3>Sūtiet mums jautājumus</h3>
-            <form @submit.prevent="sendMessage">
-              <div class="form-group">
-                <input 
-                  v-model="contactForm.name" 
-                  type="text" 
-                  placeholder="Jūsu vārds"
-                  required
-                />
-              </div>
-              <div class="form-group">
-                <input 
-                  v-model="contactForm.email" 
-                  type="email" 
-                  placeholder="Jūsu e-pasts"
-                  required
-                />
-              </div>
-              <div class="form-group">
-                <textarea 
-                  v-model="contactForm.message" 
-                  placeholder="Jūsu ziņojums"
-                  rows="5"
-                  required
-                ></textarea>
-              </div>
-              <button type="submit" class="btn-send">Sūtīt</button>
-            </form>
-            <p v-if="contactMessage" :class="contactMessageType">{{ contactMessage }}</p>
           </div>
         </div>
       </div>
@@ -185,16 +410,30 @@
           </button>
 
           <div class="modal-media">
-            <img :src="selectedAnimal.image" />
+            <img
+              :src="selectedAnimal.image"
+              :alt="selectedAnimal.name"
+              decoding="async"
+              referrerpolicy="no-referrer"
+            />
           </div>
 
           <div class="modal-content">
             <h3>{{ selectedAnimal.name }}</h3>
             <p>{{ selectedAnimal.description }}</p>
             <p><strong>Dzimums:</strong> {{ selectedAnimal.gender }}</p>
-            <button class="btn-adopt" @click="openAdoptionModal">
-              Pieteikties adopcijai
-            </button>
+            <template v-if="userLoggedIn">
+              <button type="button" class="btn-adopt" @click="openAdoptionModal">
+                Pieteikties adopcijai
+              </button>
+            </template>
+            <template v-else>
+              <p class="adopt-login-hint">
+                Lai pieteiktos adopcijai, vispirms izveidojiet kontu un pierakstieties.
+              </p>
+              <router-link class="btn-adopt btn-adopt-link" to="/login">Pierakstīties</router-link>
+              <router-link class="btn-adopt-secondary" to="/signup">Reģistrēties</router-link>
+            </template>
           </div>
 
         </div>
@@ -221,51 +460,75 @@
             ×
           </button>
 
-          <div class="modal-content">
+          <div class="modal-content adoption-modal-body">
             <h3>Pieteikšanās {{ selectedAnimal.name }} adopcijai</h3>
-            
-            <form @submit.prevent="submitAdoption">
+
+            <form class="adoption-form" @submit.prevent="submitAdoption">
               <div class="form-group">
-                <label>Jūsu vārds</label>
-                <input 
-                  v-model="adoptionForm.name" 
+                <label for="adopt-name">Jūsu vārds</label>
+                <input
+                  id="adopt-name"
+                  v-model="adoptionForm.name"
                   type="text"
+                  class="adoption-field"
+                  autocomplete="name"
                   required
                 />
               </div>
 
               <div class="form-group">
-                <label>E-pasts</label>
-                <input 
-                  v-model="adoptionForm.email" 
+                <label for="adopt-email">E-pasts</label>
+                <input
+                  id="adopt-email"
+                  v-model.trim="adoptionForm.email"
                   type="email"
+                  class="adoption-field"
+                  inputmode="email"
+                  autocomplete="email"
+                  placeholder="piemers@epasts.lv"
                   required
                 />
               </div>
 
               <div class="form-group">
-                <label>Telefons</label>
-                <input 
-                  v-model="adoptionForm.phone" 
-                  type="tel"
-                  required
-                />
+                <label for="adopt-phone">Telefons</label>
+                <div class="phone-field">
+                  <span class="phone-prefix" aria-hidden="true">+371</span>
+                  <input
+                    id="adopt-phone"
+                    v-model="adoptionPhoneDigits"
+                    type="text"
+                    class="adoption-field phone-digits"
+                    inputmode="numeric"
+                    maxlength="8"
+                    placeholder="12345678"
+                    pattern="[0-9]{8}"
+                    required
+                    @input="onAdoptionPhoneInput"
+                  />
+                </div>
+                <p class="field-hint">Tikai 8 cipari pēc +371</p>
               </div>
 
               <div class="form-group">
-                <label>dzīvojamā vieta</label>
-                <input 
-                  v-model="adoptionForm.address" 
+                <label for="adopt-address">Dzīvojamā vieta</label>
+                <input
+                  id="adopt-address"
+                  v-model="adoptionForm.address"
                   type="text"
+                  class="adoption-field"
                   placeholder="Pilsēta, iela"
+                  autocomplete="street-address"
                   required
                 />
               </div>
 
               <div class="form-group">
-                <label>Vai ir pieredze ar dzīvniekiem? Ja jā, padalies ar mums.</label>
-                <textarea 
-                  v-model="adoptionForm.experience" 
+                <label for="adopt-exp">Vai ir pieredze ar dzīvniekiem? Ja jā, padalieties ar mums.</label>
+                <textarea
+                  id="adopt-exp"
+                  v-model="adoptionForm.experience"
+                  class="adoption-field"
                   placeholder="Pastāstiet par savu pieredzi"
                   rows="4"
                   required
@@ -288,6 +551,14 @@
 </template>
 
 <script>
+import { firstValidationMessage } from '@/api/http'
+import {
+  fetchAnimalsCatalog,
+  fetchHomeStats,
+  submitApplication,
+} from '@/api/restApi'
+import { isUserLoggedIn } from '@/utils/authStorage'
+
 export default {
 
   data() {
@@ -297,44 +568,11 @@ export default {
       adoptionModalOpen: false,
       searchQuery: '',
       selectedSpecies: '',
+      speciesDropdownOpen: false,
       takenAnimalIds: [],
 
       selectedAnimal: {},
 
-      defaultAnimals: [
-        {
-          id: 1,
-          name: "Reksis",
-          species: "Suns",
-          gender: "Vīrietis",
-          description: "Draudzīgs un enerģisks suns, ideāls ģimenes draugs",
-          image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTglMbr5eE2rhr-f1qPDLurT4p5eT_f5OvlQQ&s"
-        },
-        {
-          id: 2,
-          name: "Šoko",
-          species: "Suns",
-          gender: "Vīrietis",
-          description: "Mīļš un mierīgs suns, ideāls senioru kompanija",
-          image: "https://upload.wikimedia.org/wikipedia/commons/6/6e/Golde33443.jpg"
-        },
-        {
-          id: 3,
-          name: "Anna",
-          species: "Kaķis",
-          gender: "Sieviete",
-          description: "Jauns un rotaļīgs kaķēns, pilns ar enerģiju",
-          image: "https://upload.wikimedia.org/wikipedia/commons/7/74/A-Cat.jpg"
-        },
-        {
-          id: 4,
-          name: "Dingo",
-          species: "Suns",
-          gender: "vīritis",
-          description: "Draudzīgs un enerģisks suns, ideāls ģimenes draugs",
-          image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTglMbr5eE2rhr-f1qPDLurT4p5eT_f5OvlQQ&s"
-        },
-      ],
       animals: [],
       adoptionForm: {
         name: '',
@@ -343,25 +581,42 @@ export default {
         address: '',
         experience: ''
       },
+      /** Tikai 8 cipari; pilns numurs = +371 + digits */
+      adoptionPhoneDigits: '',
 
       adoptionMessage: '',
       adoptionMessageType: '',
 
-      contactForm: {
-        name: '',
-        email: '',
-        message: ''
-      },
+      userLoggedIn: false,
 
-      contactMessage: '',
-      contactMessageType: ''
-
+      stats: null,
+      statsLoading: true,
     }
   },
 
   mounted() {
-    this.loadAnimals()
-    this.loadTakenAnimals()
+    void this.loadCatalog()
+    void this.loadStats()
+    this.refreshUserLoggedIn()
+    window.addEventListener('animalsUpdated', this.loadCatalog)
+    window.addEventListener('authUpdated', this.refreshUserLoggedIn)
+    window.addEventListener('storage', this.onAuthStorage)
+    document.addEventListener('click', this.onSpeciesFilterDocClick, true)
+  },
+  beforeUnmount() {
+    window.removeEventListener('animalsUpdated', this.loadCatalog)
+    window.removeEventListener('authUpdated', this.refreshUserLoggedIn)
+    window.removeEventListener('storage', this.onAuthStorage)
+    document.removeEventListener('click', this.onSpeciesFilterDocClick, true)
+  },
+
+  watch: {
+    $route() {
+      this.refreshUserLoggedIn()
+    },
+    modalOpen(open) {
+      if (open) this.speciesDropdownOpen = false
+    },
   },
 
   computed: {
@@ -369,25 +624,78 @@ export default {
       const species = this.animals.map(animal => animal.species || 'Cits')
       return [...new Set(species)]
     },
+    sortedSpeciesOptions() {
+      return [...this.speciesOptions].sort((a, b) => a.localeCompare(b, 'lv'))
+    },
+    speciesFilterLabel() {
+      return this.selectedSpecies || 'Visas sugas'
+    },
     filteredAnimals() {
       let list = this.animals
       if (this.selectedSpecies) {
         list = list.filter(animal => animal.species === this.selectedSpecies)
       }
       if (!this.searchQuery) return list
-      
+
       const query = this.searchQuery.toLowerCase()
-      return list.filter(animal => 
-        animal.name.toLowerCase().includes(query) || 
-        animal.gender.toLowerCase().includes(query) ||
-        animal.description.toLowerCase().includes(query)
+      return list.filter(animal =>
+        animal.name.toLowerCase().includes(query) ||
+        (animal.gender || '').toLowerCase().includes(query) ||
+        (animal.description || '').toLowerCase().includes(query),
       )
-    }
+    },
+    spotlightAnimals() {
+      return this.animals.filter((a) => !this.isTaken(a.id)).slice(0, 3)
+    },
   },
 
   methods: {
+    toggleSpeciesDropdown() {
+      this.speciesDropdownOpen = !this.speciesDropdownOpen
+    },
+    closeSpeciesDropdown() {
+      this.speciesDropdownOpen = false
+    },
+    selectSpecies(value) {
+      this.selectedSpecies = value
+      this.speciesDropdownOpen = false
+    },
+    countBySpecies(sp) {
+      return this.animals.filter((a) => (a.species || 'Cits') === sp).length
+    },
+    onSpeciesFilterDocClick(event) {
+      const root = this.$refs.speciesFilterRoot
+      if (!root || !this.speciesDropdownOpen) return
+      if (!root.contains(event.target)) this.speciesDropdownOpen = false
+    },
+
+    scrollToSection(id) {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    },
+
+    async loadStats() {
+      this.statsLoading = true
+      try {
+        this.stats = await fetchHomeStats()
+      } catch {
+        this.stats = null
+      } finally {
+        this.statsLoading = false
+      }
+    },
+
+    refreshUserLoggedIn() {
+      this.userLoggedIn = isUserLoggedIn()
+    },
+
+    onAuthStorage(event) {
+      if (event.key === 'spa_auth_token' || event.key === 'spa_auth_user') {
+        this.refreshUserLoggedIn()
+      }
+    },
 
     openModal(animal) {
+      this.refreshUserLoggedIn()
       this.selectedAnimal = animal
       this.modalOpen = true
       this.adoptionModalOpen = false
@@ -398,6 +706,13 @@ export default {
     },
 
     openAdoptionModal() {
+      this.refreshUserLoggedIn()
+      if (!this.userLoggedIn) {
+        this.$router.push('/login')
+        return
+      }
+      this.adoptionMessage = ''
+      this.adoptionMessageType = ''
       this.adoptionModalOpen = true
     },
 
@@ -410,562 +725,100 @@ export default {
         address: '',
         experience: ''
       }
+      this.adoptionPhoneDigits = ''
       this.adoptionMessage = ''
+      this.adoptionMessageType = ''
     },
 
-    submitAdoption() {
-      // Save adoption application to localStorage
-      const adoptions = JSON.parse(localStorage.getItem('adoptions')) || []
-      adoptions.push({
-        id: Date.now(),
-        animalName: this.selectedAnimal.name,
-        animalId: this.selectedAnimal.id,
-        animalImage: this.selectedAnimal.image,
-        ...this.adoptionForm,
-        submittedAt: new Date().toISOString()
-      })
-      localStorage.setItem('adoptions', JSON.stringify(adoptions))
-      this.loadTakenAnimals()
+    onAdoptionPhoneInput() {
+      this.adoptionPhoneDigits = this.adoptionPhoneDigits.replace(/\D/g, '').slice(0, 8)
+    },
 
-      this.adoptionMessage = 'Paldies! Jūsu pieteikums tika saņemts. Mēs ar jums sazināsimies drīzumā!'
-      this.adoptionMessageType = 'success'
+    isValidAdoptionEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || '').trim())
+    },
 
-      // Reset form
+    async submitAdoption() {
+      this.refreshUserLoggedIn()
+      if (!this.userLoggedIn) {
+        this.adoptionMessage = 'Pieteikties adopcijai var tikai pierakstījušies lietotāji.'
+        this.adoptionMessageType = 'error'
+        return
+      }
+
+      const email = this.adoptionForm.email.trim()
+      if (!this.isValidAdoptionEmail(email)) {
+        this.adoptionMessage = 'Lūdzu, ievadiet derīgu e-pasta adresi (piemēram, vards@epasts.lv).'
+        this.adoptionMessageType = 'error'
+        return
+      }
+
+      const digits = this.adoptionPhoneDigits.replace(/\D/g, '')
+      if (digits.length !== 8) {
+        this.adoptionMessage = 'Lūdzu, ievadiet 8 ciparus pēc +371.'
+        this.adoptionMessageType = 'error'
+        return
+      }
+
+      const phone = `+371${digits}`
+      this.adoptionForm.email = email
+      this.adoptionForm.phone = phone
+
+      try {
+        await submitApplication({
+          animal_id: this.selectedAnimal.id,
+          applicant_name: this.adoptionForm.name.trim(),
+          applicant_email: email,
+          phone,
+          address: this.adoptionForm.address || null,
+          experience: this.adoptionForm.experience || null,
+        })
+        await this.loadCatalog()
+        this.adoptionMessage =
+          'Paldies! Jūsu pieteikums tika saņemts. Mēs ar jums sazināsimies drīzumā!'
+        this.adoptionMessageType = 'success'
+      } catch (e) {
+        this.adoptionMessage = firstValidationMessage(e)
+        this.adoptionMessageType = 'error'
+        return
+      }
+
       this.adoptionForm = {
         name: '',
         email: '',
         phone: '',
         address: '',
-        experience: ''
+        experience: '',
       }
+      this.adoptionPhoneDigits = ''
 
-      // AIZVĒRT ADOPCIJAS MODALI PĒC 3 SEKUNDĒM
       setTimeout(() => {
         this.closeAdoptionModal()
         this.closeModal()
       }, 3000)
     },
 
-    loadAnimals() {
-      const storedAnimals = JSON.parse(localStorage.getItem('animals') || '[]')
-      const normalizedStored = storedAnimals.map(animal => ({
-        species: animal.species || 'Cits',
-        ...animal
-      }))
-      this.animals = normalizedStored.length ? [...this.defaultAnimals, ...normalizedStored] : this.defaultAnimals
-    },
-    loadTakenAnimals() {
-      const adoptions = JSON.parse(localStorage.getItem('adoptions') || '[]')
-      this.takenAnimalIds = adoptions.map(adoption => adoption.animalId)
+    async loadCatalog() {
+      try {
+        const { animals, takenAnimalIds } = await fetchAnimalsCatalog()
+        this.animals = animals.map((animal) => ({
+          species: animal.species || 'Cits',
+          ...animal,
+        }))
+        this.takenAnimalIds = takenAnimalIds
+      } catch {
+        this.animals = []
+        this.takenAnimalIds = []
+      }
     },
 
     isTaken(animalId) {
       return this.takenAnimalIds.includes(animalId)
     },
 
-    sendMessage() {
-      // SAGLABA ZIŅOJUMU LOCALSTORAGE
-      const messages = JSON.parse(localStorage.getItem('contactMessages')) || []
-      messages.push({
-        id: Date.now(),
-        ...this.contactForm,
-        sentAt: new Date().toISOString()
-      })
-      localStorage.setItem('contactMessages', JSON.stringify(messages))
-
-      this.contactMessage = 'Paldies! Jūsu ziņojums tika sūtīts veiksmīgi!'
-      this.contactMessageType = 'success'
-
-      // Reset form
-      this.contactForm = {
-        name: '',
-        email: '',
-        message: ''
-      }
-
-      // IZDZĒSTI ZIŅOJUMA PĒC 3 SEKUNDĒM
-      setTimeout(() => {
-        this.contactMessage = ''
-      }, 3000)
-    }
-
   }
 
 }
 </script>
 
-<style scoped>
-
-.hero {
-  padding: 40px;
-  text-align: center;
-}
-
-.hero-title {
-  font-size: 40px;
-  color:#FF6B35;
-}
-
-.hero-subtitle {
-  color: #df6335db;
-}
-
-.hero-tagline {
-  color: white;
-  font-size: 1.3rem;
-  margin: 10px 0 0;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.hero-img img {
-  width: 100%;
-  max-width: 600px;
-  border-radius: 20px;
-}
-
-.section-title {
-  text-align: center;
-  color: #FF6B35;
-  margin: 30px;
-  font-size: 2rem;
-}
-
-.animals-section {
-  padding: 50px 20px;
-  background-color: var(--dark-bg);
-}
-
-/* SEARCH BAR */
-.search-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 30px;
-}
-
-.search-field {
-  position: relative;
-  flex: 1 1 340px;
-  min-width: 260px;
-}
-
-.search-icon {
-  position: absolute;
-  left: 18px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 1rem;
-  opacity: 0.8;
-}
-
-.search-bar {
-  width: 100%;
-  padding: 14px 20px 14px 44px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 30px;
-  font-size: 1rem;
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
-}
-
-.search-bar::placeholder {
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.search-bar:focus {
-  outline: none;
-  background: rgba(255, 255, 255, 0.16);
-  border-color: #FFD23F;
-  box-shadow: 0 0 20px rgba(255, 209, 63, 0.25);
-}
-
-.select-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 210px;
-}
-
-.filter-label {
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 0.75rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.animal-select {
-  width: 100%;
-  padding: 14px 18px;
-  border-radius: 30px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  font-size: 1rem;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  cursor: pointer;
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
-  background-image: linear-gradient(45deg, transparent 50%, white 50%), linear-gradient(135deg, white 50%, transparent 50%);
-  background-position: calc(100% - 18px) calc(50% + 1px), calc(100% - 10px) calc(50% + 1px);
-  background-size: 6px 6px, 6px 6px;
-  background-repeat: no-repeat;
-}
-
-.animal-select option {
-  background: rgba(26, 26, 46, 0.98);
-  color: #ffffff;
-}
-
-.animal-select:focus {
-  outline: none;
-  border-color: #FFD23F;
-  box-shadow: 0 0 16px rgba(255, 209, 63, 0.2);
-}
-
-.cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, 250px);
-  gap: 20px;
-  justify-content: center;
-}
-
-.card {
-  background: linear-gradient(135deg, #FF6B35, #FFD23F);
-  border-radius: 15px;
-  padding: 10px;
-  box-shadow: 0 0 10px #7596ea;
-}
-
-.card img {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  border-radius: 10px;
-}
-
-.card-body {
-  padding: 10px;
-  color: white;
-}
-
-.card-body h3 {
-  margin: 10px 0 5px 0;
-}
-
-.card-img {
-  position: relative;
-}
-
-.status-badge {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 6px 12px;
-  border-radius: 18px;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-}
-
-.btn {
-  background: #2928273c;
-  color: white;
-  border: none;
-  min-width: 90px;
-  height: 50px;
-  border-radius: 40px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  padding: 0 16px;
-  margin-top: 10px;
-}
-
-.btn[disabled] {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* ABOUT SECTION */
-.about-section {
-  padding: 50px 20px;
-  background: linear-gradient(135deg, #1A1A2E, #16213E);
-}
-
-.about-content {
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.about-text {
-  color: white;
-  font-size: 1.1rem;
-  line-height: 1.8;
-}
-
-.about-text p {
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-.about-text h3 {
-  color: #FF6B35;
-  margin: 30px 0 15px 0;
-  text-align: center;
-}
-
-.services-list {
-  list-style: none;
-  padding: 0;
-  margin-bottom: 20px;
-}
-
-.services-list li {
-  padding: 10px;
-  margin: 5px 0;
-  background: rgba(255, 107, 53, 0.1);
-  border-left: 4px solid #FF6B35;
-  border-radius: 5px;
-  color: white;
-}
-
-/* CONTACT SECTION */
-.contact-section {
-  padding: 50px 20px;
-  background-color: var(--dark-bg);
-}
-
-.contact-content {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
-.contact-info {
-  color: white;
-}
-
-.contact-item {
-  margin-bottom: 30px;
-  padding: 20px;
-  background: rgba(255, 107, 53, 0.1);
-  border-left: 4px solid #FF6B35;
-  border-radius: 8px;
-}
-
-.contact-item h3 {
-  color: #FF6B35;
-  margin-bottom: 10px;
-}
-
-.contact-item p {
-  margin: 5px 0;
-}
-
-.contact-item a {
-  color: #FFD23F;
-  text-decoration: none;
-}
-
-.contact-item a:hover {
-  text-decoration: underline;
-}
-
-.contact-form {
-  background: linear-gradient(135deg, #FF6B35, #FFD23F);
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(255, 107, 53, 0.5);
-}
-
-.contact-form h3 {
-  color: white;
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-.form-group label {
-  display: block;
-  color: white;
-  font-weight: bold;
-  margin-bottom: 5px;
-}
-
-.contact-form input,
-.contact-form textarea,
-.modal-dialog input,
-.modal-dialog textarea {
-  width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-family: inherit;
-  box-sizing: border-box;
-}
-
-.contact-form input:focus,
-.contact-form textarea:focus,
-.modal-dialog input:focus,
-.modal-dialog textarea:focus {
-  outline: none;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-}
-
-.btn-send {
-  width: 100%;
-  padding: 12px;
-  background: rgba(0, 0, 0, 0.3);
-  color: white;
-  font-weight: bold;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.btn-send:hover {
-  background: rgba(0, 0, 0, 0.5);
-}
-
-.success {
-  margin-top: 15px;
-  padding: 10px;
-  background-color: rgba(76, 175, 80, 0.3);
-  color: white;
-  border-radius: 8px;
-  text-align: center;
-}
-
-/* MODAL */
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 100;
-}
-
-.modal-dialog {
-  background: linear-gradient(135deg, #FF6B35, #FFD23F);
-  padding: 35px;
-  border-radius: 30px;
-  max-width: 400px;
-  width: 90%;
-  max-height: 75vh;
-  overflow-y: auto;
-  box-shadow: 0 10px 30px rgba(255, 107, 53, 0.5);
-  animation: bounceIn 0.5s ease-out;
-  position: relative;
-}
-
-@keyframes bounceIn {
-  0% {
-    transform: scale(0.3);
-    opacity: 0;
-  }
-  50% {
-    transform: scale(1.05);
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-.modal-close {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: rgba(255, 255, 255, 0.8);
-  border: none;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  cursor: pointer;
-  font-size: 18px;
-  color: #FF6B35;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal-media img {
-  max-width: 100%;
-  max-height: 300px;
-  width: auto;
-  height: auto;
-  border-radius: 15px;
-  display: block;
-  margin: 0 auto;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-}
-
-.modal-content {
-  color: white;
-}
-
-.modal-content h3 {
-  text-align: center;
-  margin: 20px 0 15px 0;
-  color: white;
-}
-
-.modal-content p {
-  text-align: center;
-  margin: 10px 0;
-}
-
-.btn-adopt {
-  width: 100%;
-  padding: 12px;
-  background: rgba(0, 0, 0, 0.3);
-  color: white;
-  font-weight: bold;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-  margin-top: 15px;
-}
-
-.btn-adopt:hover {
-  background: rgba(0, 0, 0, 0.5);
-}
-
-@media (max-width: 768px) {
-  .contact-content {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  .hero-title {
-    font-size: 2rem;
-  }
-
-  .section-title {
-    font-size: 1.5rem;
-  }
-
-  .search-bar {
-    max-width: 100%;
-  }
-}
-
-</style>
+<style scoped src="./home-premium.css"></style>
