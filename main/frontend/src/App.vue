@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <header id="home">
+    <header id="home" class="app-site-header">
       <div class="container nav">
         <div class="brand">LAIMĪGĀS ĶEPAS</div>
 
@@ -332,6 +332,11 @@ export default {
   box-sizing: border-box;
 }
 
+html {
+  /* Anchor saites (#how, #animals) neapstājas zem sticky galvenes */
+  scroll-padding-top: 5.5rem;
+}
+
 body {
   font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   background-color: var(--hp-bg);
@@ -360,7 +365,8 @@ body {
   width: 100%;
 }
 
-header {
+/* Tikai galvenā navigācija — NEVIS visi <header> (mājas sadaļām ir savs <header class="hp-sechead">). */
+.app-site-header {
   position: sticky;
   top: 0;
   z-index: 1000;
