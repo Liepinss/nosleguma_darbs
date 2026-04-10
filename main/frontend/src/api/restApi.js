@@ -134,6 +134,11 @@ export async function adminListUsers() {
   return rows.map(mapUser)
 }
 
+export async function adminListActivityLogs() {
+  const rows = await apiFetch('/admin/activity-logs', { method: 'GET', admin: true })
+  return Array.isArray(rows) ? rows : []
+}
+
 export async function adminUpdateUser(id, patch) {
   const raw = await apiFetch(`/admin/users/${id}`, {
     method: 'PATCH',

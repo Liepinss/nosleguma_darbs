@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ContactMessage;
+use App\Support\ActivityLogger;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -27,6 +28,12 @@ class ContactMessageController extends Controller
             'status' => 'pending',
             'is_read' => false,
             'sent_at' => now(),
+        ]);
+
+        ActivityLogger::log($request, null, 'contact.submitted', [
+            'message_id' => $message->id,
+            'email' => $data['email'],
+            'name' => $data['name'],
         ]);
 
         return response()->json($this->messageArray($message), 201);
@@ -56,11 +63,21 @@ class ContactMessageController extends Controller
         $message->is_read = false;
         $message->save();
 
+        ActivityLogger::log($request, $request->user(), 'contact.status_changed', [
+            'message_id' => $id,
+            'status' => $data['status'],
+            'email' => $message->email,
+        ]);
+
         return response()->json($this->messageArray($message));
     }
 
-    public function adminDestroy(int $id)
+    public function adminDestroy(Request $request, int $id)
     {
+        ActivityLogger::log($request, $request->user(), 'contact.deleted', [
+            'message_id' => $id,
+        ]);
+
         ContactMessage::destroy($id);
 
         return response()->json(['ok' => true]);
@@ -90,6 +107,12 @@ class ContactMessageController extends Controller
         if ($targetUser) {
             $targetUser->forceFill(['is_admin' => false])->save();
         }
+
+        ActivityLogger::log($request, $request->user(), 'admin.admin_role_offer_cancelled', [
+            'message_id' => $data['message_id'],
+            'target_email' => $email,
+            'target_user_id' => $targetUser?->id,
+        ]);
 
         return response()->json(['ok' => true]);
     }

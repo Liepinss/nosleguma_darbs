@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AdoptionApplication;
+use App\Support\ActivityLogger;
 use App\Models\Animal;
 use Illuminate\Http\Request;
 
@@ -44,11 +45,26 @@ class AnimalController extends Controller
 
         $animal = Animal::create($data);
 
+        ActivityLogger::log($request, $request->user(), 'animal.created', [
+            'animal_id' => $animal->id,
+            'animal_name' => $animal->name,
+            'animal_image' => $animal->image,
+        ]);
+
         return response()->json($this->animalArray($animal), 201);
     }
 
-    public function destroy(int $id)
+    public function destroy(Request $request, int $id)
     {
+        $a = Animal::query()->find($id);
+        if ($a) {
+            ActivityLogger::log($request, $request->user(), 'animal.deleted', [
+                'animal_id' => $id,
+                'animal_name' => $a->name,
+                'animal_image' => $a->image,
+            ]);
+        }
+
         Animal::destroy($id);
 
         return response()->json(['ok' => true]);

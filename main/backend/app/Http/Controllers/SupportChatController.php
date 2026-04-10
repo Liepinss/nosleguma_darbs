@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\SupportChatMessage;
+use App\Support\ActivityLogger;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -51,6 +52,11 @@ class SupportChatController extends Controller
             'is_from_admin' => false,
             'admin_user_id' => null,
             'body' => $data['body'],
+        ]);
+
+        ActivityLogger::log($request, $request->user(), 'support.user_message', [
+            'message_id' => $msg->id,
+            'preview' => Str::limit($data['body'], 160),
         ]);
 
         return response()->json($this->mapMessage($msg), 201);
@@ -133,6 +139,13 @@ class SupportChatController extends Controller
             'is_from_admin' => true,
             'admin_user_id' => $admin->id,
             'body' => $data['body'],
+        ]);
+
+        ActivityLogger::log($request, $admin, 'support.admin_reply', [
+            'message_id' => $msg->id,
+            'to_user_id' => $target->id,
+            'to_email' => $target->email,
+            'preview' => Str::limit($data['body'], 160),
         ]);
 
         return response()->json($this->mapMessage($msg), 201);

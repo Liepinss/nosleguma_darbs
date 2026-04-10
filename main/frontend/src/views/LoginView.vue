@@ -1,36 +1,37 @@
 <template>
   <div class="login-container">
     <div class="login-box">
-      <h1>Pierakstīties</h1>
+      <h1>{{ t('login.title') }}</h1>
       <form @submit.prevent="handleLogin">
         <div class="form-group">
-          <label for="email">E-pasts</label>
-          <input 
-            type="email" 
-            id="email" 
-            v-model="email" 
-            placeholder="Ievadiet e-pastu"
+          <label for="email">{{ t('login.email') }}</label>
+          <input
+            type="email"
+            id="email"
+            v-model="email"
+            :placeholder="t('login.phEmail')"
             required
           />
         </div>
         <div class="form-group">
-          <label for="password">Parole</label>
-          <input 
-            type="password" 
-            id="password" 
-            v-model="password" 
-            placeholder="Ievadiet paroli"
+          <label for="password">{{ t('login.password') }}</label>
+          <input
+            type="password"
+            id="password"
+            v-model="password"
+            :placeholder="t('login.phPassword')"
             required
           />
         </div>
-        <button type="submit" class="btn-submit">Pierakstīties</button>
+        <button type="submit" class="btn-submit">{{ t('login.submit') }}</button>
       </form>
       <p v-if="message" :class="messageType === 'success' ? 'success-message' : 'error-message'">{{ message }}</p>
       <p v-if="$route.query.redirect === '/admin'" class="admin-login-hint">
-        Administratora panelim pieslēdzieties ar kontu, kam ir admin tiesības.
+        {{ t('login.adminHint') }}
       </p>
       <p class="switch-form">
-        Nav konta? <router-link to="/signup">Reģistrējieties</router-link>
+        {{ t('login.noAccount') }}
+        <router-link to="/signup">{{ t('login.goSignup') }}</router-link>
       </p>
     </div>
   </div>
@@ -39,6 +40,9 @@
 <script>
 import { firstValidationMessage } from '@/api/http'
 import { login } from '@/api/authApi'
+import { translate } from '@/i18n/siteMessages'
+import { useLocaleStore } from '@/stores/locale'
+import { mapState } from 'pinia'
 
 export default {
   name: 'LoginView',
@@ -47,20 +51,36 @@ export default {
       email: '',
       password: '',
       message: '',
-      messageType: ''
+      messageType: '',
     }
+  },
+  computed: {
+    ...mapState(useLocaleStore, ['lang']),
+    t() {
+      return (key) => translate(this.lang, key)
+    },
+  },
+  watch: {
+    lang() {
+      this.applyRouteMessages()
+      if (this.messageType === 'success' && this.message) {
+        this.message = translate(this.lang, 'login.success')
+      }
+    },
   },
   mounted() {
-    if (this.$route.query.blocked === '1') {
-      this.message = 'Jūsu konts ir bloķēts. Sazinieties ar administratoru.'
-      this.messageType = 'error'
-    }
-    if (this.$route.query.noadmin === '1') {
-      this.message = 'Jums nav piekļuves administratora panelim. Sazinieties ar administratoru.'
-      this.messageType = 'error'
-    }
+    this.applyRouteMessages()
   },
   methods: {
+    applyRouteMessages() {
+      if (this.$route.query.blocked === '1') {
+        this.message = translate(this.lang, 'login.errBlocked')
+        this.messageType = 'error'
+      } else if (this.$route.query.noadmin === '1') {
+        this.message = translate(this.lang, 'login.errNoAdmin')
+        this.messageType = 'error'
+      }
+    },
     async handleLogin() {
       this.message = ''
       try {
@@ -69,7 +89,7 @@ export default {
           password: this.password,
         })
         window.dispatchEvent(new Event('authUpdated'))
-        this.message = 'Pierakstīšanās veiksmīga! Pāradresējam...'
+        this.message = translate(this.lang, 'login.success')
         this.messageType = 'success'
         setTimeout(() => {
           const r = this.$route.query.redirect
@@ -84,7 +104,7 @@ export default {
         this.messageType = 'error'
       }
     },
-  }
+  },
 }
 </script>
 

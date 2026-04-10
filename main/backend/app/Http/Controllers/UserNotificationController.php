@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ContactMessage;
+use App\Support\ActivityLogger;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -38,10 +39,16 @@ class UserNotificationController extends Controller
     {
         $email = $request->user()->email;
 
-        ContactMessage::query()
+        $deleted = ContactMessage::query()
             ->whereKey($id)
             ->where('email', $email)
             ->delete();
+
+        if ($deleted) {
+            ActivityLogger::log($request, $request->user(), 'notification.deleted', [
+                'notification_id' => $id,
+            ]);
+        }
 
         return response()->json(['ok' => true]);
     }
@@ -67,6 +74,10 @@ class UserNotificationController extends Controller
 
         $message->delete();
         $user->forceFill(['is_admin' => false])->save();
+
+        ActivityLogger::log($request, $user, 'user.declined_admin_role', [
+            'message_id' => $data['message_id'],
+        ]);
 
         return response()->json(['ok' => true]);
     }

@@ -1,8 +1,8 @@
 <template>
   <div class="admin-container">
     <div class="admin-header">
-      <h1>Admin panelis</h1>
-      <button @click="logout" class="btn-logout">Iziet</button>
+      <h1>{{ t('admin.title') }}</h1>
+      <button @click="logout" class="btn-logout">{{ t('admin.logout') }}</button>
     </div>
 
     <div class="admin-content">
@@ -12,46 +12,54 @@
           @click="activeTab = 'messages'"
           class="tab-btn"
         >
-          Ziņojumi
+          {{ t('admin.tab.messages') }}
         </button>
         <button
           :class="{ active: activeTab === 'supportChat' }"
           @click="openSupportChatTab"
           class="tab-btn"
         >
-          Support čats
+          {{ t('admin.tab.support') }}
         </button>
         <button
           :class="{ active: activeTab === 'adoptions' }"
           @click="activeTab = 'adoptions'"
           class="tab-btn"
         >
-          Adopcijas pieteikumi
+          {{ t('admin.tab.adoptions') }}
         </button>
         <button
           :class="{ active: activeTab === 'animals' }"
           @click="activeTab = 'animals'"
           class="tab-btn"
         >
-          Dzīvnieki
+          {{ t('admin.tab.animals') }}
         </button>
         <button
           :class="{ active: activeTab === 'users' }"
           @click="activeTab = 'users'"
           class="tab-btn"
         >
-          Lietotāji
+          {{ t('admin.tab.users') }}
+        </button>
+        <button
+          :class="{ active: activeTab === 'logs' }"
+          type="button"
+          @click="openLogsTab"
+          class="tab-btn"
+        >
+          {{ t('admin.tab.logs') }}
         </button>
       </div>
 
       <!-- MESSAGES TAB -->
       <div v-if="activeTab === 'messages'" class="tab-content">
         <div class="tab-header-row">
-          <h2>Kontaktu ziņojumi</h2>
-          <button @click="loadData" class="btn-refresh">Atsvaidzināt</button>
+          <h2>{{ t('admin.msg.title') }}</h2>
+          <button @click="loadData" class="btn-refresh">{{ t('admin.refresh') }}</button>
         </div>
         <div v-if="messages.length === 0" class="no-data">
-          Nav ziņojumu
+          {{ t('admin.msg.none') }}
         </div>
         <div v-else class="messages-list">
           <div v-for="message in messages" :key="message.id" class="message-item">
@@ -59,28 +67,28 @@
               <strong>{{ message.name }}</strong>
               <span class="message-date">{{ formatDate(message.sentAt) }}</span>
             </div>
-            <p><strong>E-pasts:</strong> {{ message.email }}</p>
-            <p v-if="message.selectedAnimals"><strong>Izvēlētie dzīvnieki:</strong> {{ message.selectedAnimals }}</p>
-            <p><strong>Ziņojums:</strong></p>
+            <p><strong>{{ t('admin.label.email') }}</strong> {{ message.email }}</p>
+            <p v-if="message.selectedAnimals"><strong>{{ t('admin.label.animals') }}</strong> {{ message.selectedAnimals }}</p>
+            <p><strong>{{ t('admin.label.message') }}</strong></p>
             <p class="message-text">{{ message.message }}</p>
-            <p><strong>Status:</strong> {{ message.status || 'pending' }}</p>
+            <p><strong>{{ t('admin.label.status') }}</strong> {{ messageStatusLabel(message.status) }}</p>
             <div class="message-actions">
-              <button v-if="message.status === 'pending'" @click="approveMessage(message.id)" class="btn-approve">Apstiprināt</button>
-              <button v-if="message.status === 'pending'" @click="declineMessage(message.id)" class="btn-decline">Noraidīt</button>
+              <button v-if="message.status === 'pending'" @click="approveMessage(message.id)" class="btn-approve">{{ t('admin.btn.approve') }}</button>
+              <button v-if="message.status === 'pending'" @click="declineMessage(message.id)" class="btn-decline">{{ t('admin.btn.decline') }}</button>
               <span
                 v-else-if="message.status === 'approved' && message.source !== 'admin_role_grant'"
                 class="message-approved"
-              >Apstiprināts</span>
-              <span v-else-if="message.status === 'declined'" class="message-declined">Noraidīts</span>
+              >{{ t('admin.status.approved') }}</span>
+              <span v-else-if="message.status === 'declined'" class="message-declined">{{ t('admin.status.declined') }}</span>
               <button
                 v-if="message.source === 'admin_role_grant'"
                 type="button"
                 @click="cancelAdminRoleOffer(message)"
                 class="btn-decline-admin-offer-admin"
               >
-                Noraidīt admin piedāvājumu
+                {{ t('admin.btn.declineOffer') }}
               </button>
-              <button @click="deleteMessage(message.id)" class="btn-delete">Dzēst</button>
+              <button @click="deleteMessage(message.id)" class="btn-delete">{{ t('admin.btn.delete') }}</button>
             </div>
           </div>
         </div>
@@ -89,25 +97,25 @@
       <!-- SUPPORT CHAT TAB -->
       <div v-if="activeTab === 'supportChat'" class="tab-content">
         <div class="tab-header-row">
-          <h2>Support čats</h2>
-          <button type="button" @click="loadSupportChatThreads" class="btn-refresh">Atsvaidzināt</button>
+          <h2>{{ t('admin.support.title') }}</h2>
+          <button type="button" @click="loadSupportChatThreads" class="btn-refresh">{{ t('admin.refresh') }}</button>
         </div>
         <div class="support-chat-layout">
           <div class="support-chat-threads">
-            <div v-if="!supportThreads.length" class="no-data">Nav sarunu</div>
+            <div v-if="!supportThreads.length" class="no-data">{{ t('admin.support.none') }}</div>
             <button
-              v-for="t in supportThreads"
-              :key="t.userId"
+              v-for="thread in supportThreads"
+              :key="thread.userId"
               type="button"
-              :class="['support-thread-row', { active: supportChatUserId === t.userId }]"
-              @click="selectSupportThread(t.userId)"
+              :class="['support-thread-row', { active: supportChatUserId === thread.userId }]"
+              @click="selectSupportThread(thread.userId)"
             >
               <span class="support-thread-row__top">
-                <strong>{{ t.name }}</strong>
-                <span v-if="t.unreadFromUser" class="support-thread-badge">{{ t.unreadFromUser }}</span>
+                <strong>{{ thread.name }}</strong>
+                <span v-if="thread.unreadFromUser" class="support-thread-badge">{{ thread.unreadFromUser }}</span>
               </span>
-              <span class="support-thread-row__email">{{ t.email }}</span>
-              <span class="support-thread-row__preview">{{ t.lastPreview }}</span>
+              <span class="support-thread-row__email">{{ thread.email }}</span>
+              <span class="support-thread-row__preview">{{ thread.lastPreview }}</span>
             </button>
           </div>
           <div v-if="supportChatUserId" class="support-chat-pane">
@@ -132,25 +140,25 @@
                 v-model="supportReply"
                 class="support-chat-reply__input"
                 rows="3"
-                placeholder="Atbilde lietotājam…"
+                :placeholder="t('admin.support.placeholder')"
                 maxlength="5000"
               />
               <button type="button" class="btn-save support-chat-reply__btn" @click="sendSupportReply">
-                Sūtīt atbildi
+                {{ t('admin.support.send') }}
               </button>
             </div>
           </div>
           <div v-else class="no-data support-chat-placeholder">
-            Izvēlieties sarunu no saraksta
+            {{ t('admin.support.pick') }}
           </div>
         </div>
       </div>
 
       <!-- ADOPTIONS TAB -->
       <div v-if="activeTab === 'adoptions'" class="tab-content">
-        <h2>Adopcijas pieteikumi</h2>
+        <h2>{{ t('admin.adopt.title') }}</h2>
         <div v-if="adoptions.length === 0" class="no-data">
-          Nav pieteikumu
+          {{ t('admin.adopt.none') }}
         </div>
         <div v-else class="adoptions-list">
           <div v-for="adoption in adoptions" :key="adoption.id" class="adoption-item">
@@ -158,45 +166,45 @@
               <strong>🐾 {{ adoption.animalName }}</strong>
               <span class="adoption-date">{{ formatDate(adoption.submittedAt) }}</span>
             </div>
-            <p><strong>Vārds:</strong> {{ adoption.name }}</p>
-            <p><strong>E-pasts:</strong> {{ adoption.email }}</p>
-            <p><strong>Telefons:</strong> {{ adoption.phone }}</p>
-            <p><strong>Dzīvojamais vieta:</strong> {{ adoption.address }}</p>
-            <p><strong>Pieredze:</strong></p>
+            <p><strong>{{ t('admin.adopt.name') }}</strong> {{ adoption.name }}</p>
+            <p><strong>{{ t('admin.adopt.email') }}</strong> {{ adoption.email }}</p>
+            <p><strong>{{ t('admin.adopt.phone') }}</strong> {{ adoption.phone }}</p>
+            <p><strong>{{ t('admin.adopt.address') }}</strong> {{ adoption.address }}</p>
+            <p><strong>{{ t('admin.adopt.exp') }}</strong></p>
             <p class="experience-text">{{ adoption.experience }}</p>
-            <button @click="deleteAdoption(adoption.id)" class="btn-delete">Dzēst</button>
+            <button @click="deleteAdoption(adoption.id)" class="btn-delete">{{ t('admin.btn.delete') }}</button>
           </div>
         </div>
       </div>
       <div v-if="activeTab === 'animals'" class="tab-content">
-        <h2>Pievienot jaunu dzīvnieku</h2>
+        <h2>{{ t('admin.an.addTitle') }}</h2>
         <div class="animal-form">
           <div class="form-row">
-            <label>Vārds</label>
-            <input v-model="animalForm.name" type="text" placeholder="Dzīvnieka vārds" />
+            <label>{{ t('admin.an.name') }}</label>
+            <input v-model="animalForm.name" type="text" :placeholder="t('admin.an.phName')" />
           </div>
           <div class="form-row">
-            <label>Dzimums</label>
-            <input v-model="animalForm.gender" type="text" placeholder="Dzimums" />
+            <label>{{ t('admin.an.gender') }}</label>
+            <input v-model="animalForm.gender" type="text" :placeholder="t('admin.an.phGender')" />
           </div>
           <div class="form-row">
-            <label>Kategorija</label>
-            <input v-model="animalForm.species" type="text" placeholder="Piemēram Suns, Kaķis" />
+            <label>{{ t('admin.an.category') }}</label>
+            <input v-model="animalForm.species" type="text" :placeholder="t('admin.an.phCat')" />
           </div>
           <div class="form-row">
-            <label>Apraksts</label>
-            <textarea v-model="animalForm.description" placeholder="Apraksts"></textarea>
+            <label>{{ t('admin.an.desc') }}</label>
+            <textarea v-model="animalForm.description" :placeholder="t('admin.an.phDesc')"></textarea>
           </div>
           <div class="form-row">
-            <label>Attēla URL</label>
-            <input v-model="animalForm.image" type="text" placeholder="https://..." />
+            <label>{{ t('admin.an.image') }}</label>
+            <input v-model="animalForm.image" type="text" :placeholder="t('admin.an.phUrl')" />
           </div>
-          <button @click="addAnimal" class="btn-save">Saglabāt dzīvnieku</button>
+          <button @click="addAnimal" class="btn-save">{{ t('admin.an.save') }}</button>
         </div>
 
-        <h2>Esošie dzīvnieki</h2>
+        <h2>{{ t('admin.an.listTitle') }}</h2>
         <div v-if="storedAnimals.length === 0" class="no-data">
-          Nav pievienotu dzīvnieku
+          {{ t('admin.an.none') }}
         </div>
         <div v-else class="animals-list">
           <div v-for="animal in storedAnimals" :key="animal.id" class="animal-item">
@@ -211,67 +219,67 @@
                 referrerpolicy="no-referrer"
               />
               <div>
-                <strong>{{ animal.name }}</strong> — {{ animal.species || 'Cits' }}, {{ animal.gender }}
+                <strong>{{ animal.name }}</strong> — {{ speciesDisplay(animal.species || 'Cits') }}, {{ animal.gender }}
                 <p>{{ animal.description }}</p>
               </div>
             </div>
-            <button type="button" @click="deleteAnimal(animal.id)" class="btn-delete">Dzēst</button>
+            <button type="button" @click="deleteAnimal(animal.id)" class="btn-delete">{{ t('admin.btn.delete') }}</button>
           </div>
         </div>
       </div>
 
       <!-- USERS TAB -->
       <div v-if="activeTab === 'users'" class="tab-content">
-        <div class="tab-header-row">
-          <h2>Pierakstījušies lietotāji (pēdējā pierakstīšanās &gt; iziešana)</h2>
-          <button type="button" @click="loadUsersAdmin" class="btn-refresh">Atsvaidzināt</button>
-        </div>
-        <p class="users-hint">
-          Dati no servera. Admin poga galvenē redzama tikai kontiem ar admin tiesībām (sākumā Rudolfs; pārējie — pēc „Piešķirt admin lomu”).
-        </p>
-        <div v-if="activeSessions.length === 0" class="no-data">
-          Neviens lietotājs šobrīd nav atzīmēts kā pierakstījies
-        </div>
-        <div v-else class="sessions-list">
-          <div v-for="session in activeSessions" :key="session.email" class="session-item">
-            <div class="session-header">
-              <strong>{{ session.name || 'Nav vārda' }}</strong>
-              <span class="session-date">{{ formatDate(session.loginAt) }}</span>
-            </div>
-            <p><strong>E-pasts:</strong> {{ session.email }}</p>
+        <div class="users-accounts-toolbar">
+          <h2 class="users-section-title">{{ t('admin.users.all') }}</h2>
+          <div class="users-toolbar-actions">
+            <label class="users-filter-label" for="admin-users-filter">
+              <span class="users-filter-label-text">{{ t('admin.users.filterLabel') }}</span>
+              <select
+                id="admin-users-filter"
+                v-model="usersAccountFilter"
+                class="users-filter-select"
+              >
+                <option value="all">{{ t('admin.users.filterAll') }}</option>
+                <option value="active">{{ t('admin.users.filterActive') }}</option>
+                <option value="blocked">{{ t('admin.users.filterBlocked') }}</option>
+              </select>
+            </label>
+            <button type="button" @click="loadUsersAdmin" class="btn-refresh">{{ t('admin.refresh') }}</button>
           </div>
         </div>
-
-        <h2 class="users-section-title">Visi reģistrētie konti</h2>
         <div v-if="registeredUsers.length === 0" class="no-data">
-          Nav lietotāju
+          {{ t('admin.users.none') }}
+        </div>
+        <div v-else-if="filteredRegisteredUsers.length === 0" class="no-data">
+          {{ t('admin.users.filterEmpty') }}
         </div>
         <div v-else class="users-list">
-          <div v-for="user in registeredUsers" :key="user.id" class="user-admin-item">
+          <div v-for="user in filteredRegisteredUsers" :key="user.id" class="user-admin-item">
             <div class="user-admin-main">
               <strong>{{ user.name }}</strong>
-              <span v-if="user.isOwner" class="badge-owner">Īpašnieks</span>
-              <span v-if="user.blocked" class="badge-blocked">Bloķēts</span>
-              <span v-if="user.isAdmin" class="badge-admin">Admin loma</span>
-              <p><strong>E-pasts:</strong> {{ user.email }}</p>
+              <span v-if="user.isOwner" class="badge-owner">{{ t('admin.badge.owner') }}</span>
+              <span v-if="user.blocked" class="badge-blocked">{{ t('admin.badge.blocked') }}</span>
+              <span v-if="user.isAdmin" class="badge-admin">{{ t('admin.badge.admin') }}</span>
+              <p><strong>{{ t('admin.label.email') }}</strong> {{ user.email }}</p>
               <div class="user-activity">
                 <p v-if="sessionsByEmail[user.email]" class="user-activity-row">
-                  <span class="badge-online">Šobrīd tiešsaistē</span>
+                  <span class="badge-online">{{ t('admin.badge.online') }}</span>
                   <span class="user-activity-detail">
-                    šajā pārlūkā kopš {{ formatDate(sessionsByEmail[user.email].loginAt) }}
+                    {{ t('admin.users.since') }} {{ formatDate(sessionsByEmail[user.email].loginAt) }}
                   </span>
                 </p>
                 <p v-else class="user-activity-row">
-                  <span class="badge-offline">Nav tiešsaistē</span>
+                  <span class="badge-offline">{{ t('admin.badge.offline') }}</span>
                   <span
                     v-if="user.lastLogoutAt"
                     class="user-activity-detail"
                   >
-                    pēdējā iziešana {{ formatDate(user.lastLogoutAt) }}
+                    {{ t('admin.users.lastOut') }} {{ formatDate(user.lastLogoutAt) }}
                   </span>
                 </p>
                 <p class="user-activity-row muted">
-                  <strong>Pēdējā pierakstīšanās:</strong>
+                  <strong>{{ t('admin.users.lastIn') }}</strong>
                   {{ user.lastLoginAt ? formatDate(user.lastLoginAt) : '—' }}
                 </p>
               </div>
@@ -283,7 +291,7 @@
                 @click="blockUser(user)"
                 class="btn-block-user"
               >
-                Bloķēt piekļuvi
+                {{ t('admin.users.block') }}
               </button>
               <button
                 v-else
@@ -291,7 +299,7 @@
                 @click="unblockUser(user)"
                 class="btn-unblock-user"
               >
-                Atbloķēt
+                {{ t('admin.users.unblock') }}
               </button>
               <button
                 v-if="!user.blocked"
@@ -299,10 +307,57 @@
                 @click="grantAdminRole(user)"
                 class="btn-grant-admin"
               >
-                Piešķirt admin lomu
+                {{ t('admin.users.grantAdmin') }}
               </button>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- ACTIVITY LOG TAB -->
+      <div v-if="activeTab === 'logs'" class="tab-content">
+        <div class="tab-header-row">
+          <h2>{{ t('admin.logs.title') }}</h2>
+          <button type="button" @click="loadActivityLogs" class="btn-refresh">{{ t('admin.refresh') }}</button>
+        </div>
+        <div v-if="activityLogs.length === 0" class="no-data">
+          {{ t('admin.logs.none') }}
+        </div>
+        <div v-else class="activity-log-scroll">
+          <table class="activity-log-table">
+            <thead>
+              <tr>
+                <th>{{ t('admin.logs.colTime') }}</th>
+                <th>{{ t('admin.logs.colUser') }}</th>
+                <th>{{ t('admin.logs.colAction') }}</th>
+                <th>{{ t('admin.logs.colDetails') }}</th>
+                <th>{{ t('admin.logs.colIp') }}</th>
+                <th>{{ t('admin.logs.colDevice') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in activityLogs" :key="row.id">
+                <td>{{ formatDate(row.at) }}</td>
+                <td>
+                  <template v-if="row.user">
+                    <strong>{{ row.user.name }}</strong>
+                    <span class="activity-log-email">{{ row.user.email }}</span>
+                  </template>
+                  <span v-else class="muted">{{ t('admin.logs.guest') }}</span>
+                </td>
+                <td>{{ logActionLabel(row.action) }}</td>
+                <td class="activity-details-cell">
+                  <p v-if="activityLogDetailLine(row)" class="activity-detail-text">{{ activityLogDetailLine(row) }}</p>
+                  <pre v-if="activityLogSecondaryMeta(row)" class="activity-meta activity-meta--extra">{{
+                    activityLogSecondaryMeta(row)
+                  }}</pre>
+                  <pre v-else-if="!activityLogDetailLine(row)" class="activity-meta">{{ formatLogMeta(row.meta) }}</pre>
+                </td>
+                <td class="muted activity-log-ip">{{ row.ip || '—' }}</td>
+                <td class="muted activity-log-ua" :title="row.userAgent || ''">{{ shortUa(row.userAgent) }}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -317,6 +372,7 @@ import {
   adminDeleteApplication,
   adminDeleteContactMessage,
   adminFetchSupportChat,
+  adminListActivityLogs,
   adminListApplications,
   adminListContactMessages,
   adminListSupportThreads,
@@ -326,7 +382,10 @@ import {
   adminUpdateUser,
   fetchAnimalsCatalog,
 } from '@/api/restApi'
+import { translate } from '@/i18n/siteMessages'
+import { useLocaleStore } from '@/stores/locale'
 import { deriveActiveSessionsFromUsers, setUserBlocked } from '@/utils/authStorage'
+import { mapState } from 'pinia'
 
 export default {
   name: 'AdminView',
@@ -350,15 +409,31 @@ export default {
       supportChatUser: null,
       supportMessages: [],
       supportReply: '',
+      activityLogs: [],
+      usersAccountFilter: 'all',
     }
   },
   computed: {
+    ...mapState(useLocaleStore, ['lang']),
+    t() {
+      return (key) => translate(this.lang, key)
+    },
     sessionsByEmail() {
       const map = {}
       for (const s of this.activeSessions) {
         map[s.email] = s
       }
       return map
+    },
+    filteredRegisteredUsers() {
+      const list = this.registeredUsers
+      if (this.usersAccountFilter === 'blocked') {
+        return list.filter((u) => u.blocked)
+      }
+      if (this.usersAccountFilter === 'active') {
+        return list.filter((u) => !u.blocked)
+      }
+      return list
     },
   },
   mounted() {
@@ -383,6 +458,86 @@ export default {
     openSupportChatTab() {
       this.activeTab = 'supportChat'
       void this.loadSupportChatThreads()
+    },
+    openLogsTab() {
+      this.activeTab = 'logs'
+      void this.loadActivityLogs()
+    },
+    async loadActivityLogs() {
+      try {
+        this.activityLogs = await adminListActivityLogs()
+      } catch {
+        this.activityLogs = []
+      }
+    },
+    logActionLabel(action) {
+      const key = `log.${action}`
+      const s = translate(this.lang, key)
+      return s === key ? action : s
+    },
+    formatLogMeta(meta) {
+      if (meta == null || (typeof meta === 'object' && Object.keys(meta).length === 0)) return '—'
+      try {
+        return JSON.stringify(meta, null, 2)
+      } catch {
+        return '—'
+      }
+    },
+    logMetaHasAnimal(row) {
+      const m = row.meta
+      if (!m || typeof m !== 'object') return false
+      const a = String(row.action || '')
+      if (a.startsWith('animal.') || a.startsWith('adoption.')) return true
+      return m.animal_id != null
+    },
+    logMetaAnimalLabel(m) {
+      if (!m) return this.t('admin.logs.detail.unknownAnimal')
+      if (m.animal_name) return m.animal_name
+      if (m.name && (m.animal_id != null || m.animal_image || m.image)) return m.name
+      if (m.animal_id != null) {
+        return this.t('admin.logs.detail.animalIdOnly').replace('{id}', String(m.animal_id))
+      }
+      return this.t('admin.logs.detail.unknownAnimal')
+    },
+    activityLogDetailLine(row) {
+      if (!this.logMetaHasAnimal(row)) return null
+      const m = row.meta || {}
+      const animal = this.logMetaAnimalLabel(m)
+      const id = m.animal_id != null ? String(m.animal_id) : '—'
+      const fill = (tpl) => tpl.replace('{animal}', animal).replace('{id}', id)
+      switch (row.action) {
+        case 'adoption.submitted':
+          return fill(this.t('admin.logs.detail.adoptionSubmitted'))
+        case 'adoption.withdrawn':
+          return fill(this.t('admin.logs.detail.adoptionWithdrawn'))
+        case 'adoption.deleted_by_admin':
+          return fill(this.t('admin.logs.detail.adoptionDeletedAdmin'))
+        case 'animal.created':
+          return fill(this.t('admin.logs.detail.animalCreated'))
+        case 'animal.deleted':
+          return fill(this.t('admin.logs.detail.animalDeleted'))
+        default:
+          return fill(this.t('admin.logs.detail.animalGeneric'))
+      }
+    },
+    activityLogSecondaryMeta(row) {
+      const m = row.meta
+      if (!m || typeof m !== 'object') return null
+      const skip = new Set(['animal_id', 'animal_name', 'animal_image', 'name', 'image'])
+      const rest = {}
+      for (const [k, v] of Object.entries(m)) {
+        if (!skip.has(k)) rest[k] = v
+      }
+      if (Object.keys(rest).length === 0) return null
+      try {
+        return JSON.stringify(rest, null, 2)
+      } catch {
+        return null
+      }
+    },
+    shortUa(ua) {
+      if (!ua) return '—'
+      return ua.length > 80 ? `${ua.slice(0, 77)}…` : ua
     },
     async loadSupportChatThreads() {
       try {
@@ -457,9 +612,9 @@ export default {
       try {
         await adminCreateAnimal({
           name: this.animalForm.name,
-          species: this.animalForm.species || 'Cits',
-          gender: this.animalForm.gender || 'Nav norādīts',
-          description: this.animalForm.description || 'Nav apraksta',
+          species: this.animalForm.species || translate(this.lang, 'species.other'),
+          gender: this.animalForm.gender || translate(this.lang, 'admin.an.defaultGender'),
+          description: this.animalForm.description || translate(this.lang, 'admin.an.defaultDesc'),
           image: this.animalForm.image,
         })
         await this.loadAnimals()
@@ -486,7 +641,24 @@ export default {
     },
     formatDate(dateString) {
       if (!dateString) return '—'
-      return new Date(dateString).toLocaleString('lv-LV')
+      const loc = this.lang === 'en' ? 'en-GB' : 'lv-LV'
+      return new Date(dateString).toLocaleString(loc, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    },
+    messageStatusLabel(status) {
+      const s = status || 'pending'
+      if (s === 'pending') return translate(this.lang, 'admin.status.pending')
+      if (s === 'approved') return translate(this.lang, 'admin.status.approved')
+      if (s === 'declined') return translate(this.lang, 'admin.status.declined')
+      return s
+    },
+    speciesDisplay(species) {
+      return species === 'Cits' ? translate(this.lang, 'species.other') : species
     },
     async deleteMessage(id) {
       try {
@@ -592,8 +764,85 @@ export default {
 
 .admin-tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 30px;
+}
+
+.activity-log-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 12px;
+  border: 1px solid var(--hp-line-strong, rgba(255, 255, 255, 0.12));
+}
+
+.activity-log-table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.activity-log-table th,
+.activity-log-table td {
+  padding: 0.65rem 0.75rem;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--hp-line-strong, rgba(255, 255, 255, 0.08));
+}
+
+.activity-log-table th {
+  font-weight: 700;
+  color: var(--hp-muted, rgba(244, 244, 245, 0.75));
+  white-space: nowrap;
+}
+
+.activity-log-email {
+  display: block;
+  font-size: 0.8rem;
+  opacity: 0.85;
+  margin-top: 0.15rem;
+}
+
+.activity-details-cell {
+  min-width: 200px;
+  max-width: 320px;
+}
+
+.activity-detail-text {
+  margin: 0 0 0.35rem;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.activity-details-cell .activity-detail-text:last-child {
+  margin-bottom: 0;
+}
+
+.activity-meta {
+  margin: 0;
+  font-family: ui-monospace, monospace;
+  font-size: 0.72rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-width: 280px;
+  max-height: 120px;
+  overflow: auto;
+}
+
+.activity-meta--extra {
+  margin-top: 0.35rem;
+  max-height: 96px;
+}
+
+.activity-log-ip {
+  white-space: nowrap;
+}
+
+.activity-log-ua {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .tab-btn {
@@ -877,24 +1126,75 @@ export default {
   font-weight: bold;
 }
 
-.users-hint {
-  color: rgba(255, 255, 255, 0.65);
-  font-size: 0.9rem;
-  margin-bottom: 16px;
-  line-height: 1.45;
-}
-
 .users-section-title {
   margin-top: 36px;
 }
 
-.sessions-list,
+.users-accounts-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  margin-bottom: 20px;
+}
+
+.users-accounts-toolbar .users-section-title {
+  margin: 0;
+}
+
+.users-toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+}
+
+.users-filter-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.users-filter-label-text {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--hp-muted, rgba(244, 244, 245, 0.75));
+  white-space: nowrap;
+}
+
+.users-filter-select {
+  min-width: 11rem;
+  padding: 0.5rem 2rem 0.5rem 0.9rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--hp-line-strong, rgba(255, 255, 255, 0.18));
+  background: rgba(0, 0, 0, 0.28);
+  color: var(--hp-text, #f4f4f5);
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23f4f4f5' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+}
+
+.users-filter-select:focus {
+  outline: 2px solid var(--hp-orange, #ff5722);
+  outline-offset: 2px;
+}
+
+.users-filter-select option {
+  color: #1a1a1a;
+  background: #fff;
+}
+
 .users-list {
   display: grid;
   gap: 16px;
 }
 
-.session-item,
 .user-admin-item {
   background: var(--hp-surface, rgba(255, 255, 255, 0.055));
   border: 1px solid var(--hp-line, rgba(255, 255, 255, 0.1));
@@ -956,23 +1256,6 @@ export default {
   font-weight: 700;
 }
 
-.session-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  margin-bottom: 8px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--hp-line, rgba(255, 255, 255, 0.1));
-  color: var(--hp-text, #f4f4f5);
-}
-
-.session-date {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.75);
-}
-
-.session-item p,
 .user-admin-item p {
   color: white;
   margin: 4px 0 0;

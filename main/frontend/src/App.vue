@@ -4,6 +4,25 @@
       <div class="container nav">
         <div class="brand">LAIMĪGĀS ĶEPAS</div>
 
+        <div class="lang-switch" role="group" :aria-label="t('lang.aria')">
+          <button
+            type="button"
+            class="lang-switch__btn"
+            :class="{ 'lang-switch__btn--active': lang === 'lv' }"
+            @click="setSiteLang('lv')"
+          >
+            {{ t('lang.lv') }}
+          </button>
+          <button
+            type="button"
+            class="lang-switch__btn"
+            :class="{ 'lang-switch__btn--active': lang === 'en' }"
+            @click="setSiteLang('en')"
+          >
+            {{ t('lang.en') }}
+          </button>
+        </div>
+
         <button 
           class="hamburger" 
           @click="toggleMenu"
@@ -16,29 +35,29 @@
 
         <nav :class="{ open: menuOpen }">
           <ul class="menu">
-            <li><a href="/" @click.prevent="goHome">Sākums</a></li>
-            <li><a href="#how" @click="closeMenu">Kā notiek</a></li>
-            <li><a href="#animals" @click="closeMenu">Dzīvnieki</a></li>
-            <li><a href="#about" @click="closeMenu">Par mums</a></li>
-            <li><a href="#contact" @click="closeMenu">Kontakti</a></li>
+            <li><a href="/" @click.prevent="goHome">{{ t('nav.home') }}</a></li>
+            <li><a href="#how" @click="closeMenu">{{ t('nav.how') }}</a></li>
+            <li><a href="#animals" @click="closeMenu">{{ t('nav.animals') }}</a></li>
+            <li><a href="#about" @click="closeMenu">{{ t('nav.about') }}</a></li>
+            <li><a href="#contact" @click="closeMenu">{{ t('nav.contact') }}</a></li>
           </ul>
-          <div class="menu-auth" aria-label="Konta darbības">
+          <div class="menu-auth" :aria-label="t('nav.authAria')">
             <template v-if="userLoggedIn">
               <button type="button" @click="openNotificationsFromMenu" class="btn-notification">
-                Paziņojumi
+                {{ t('nav.notifications') }}
                 <span v-if="unreadNotifications" class="notification-badge">{{ unreadNotifications }}</span>
               </button>
-              <router-link to="/account" class="btn-account" @click="closeMenu">Mans konts</router-link>
+              <router-link to="/account" class="btn-account" @click="closeMenu">{{ t('nav.account') }}</router-link>
               <router-link
                 v-if="userIsAdmin"
                 to="/admin"
                 class="btn-admin"
                 @click="closeMenu"
-              >Admin</router-link>
+              >{{ t('nav.admin') }}</router-link>
             </template>
             <template v-else>
-              <router-link to="/login" class="btn-login" @click="closeMenu">Pierakstīties</router-link>
-              <router-link to="/signup" class="btn-signup" @click="closeMenu">Reģistrējieties</router-link>
+              <router-link to="/login" class="btn-login" @click="closeMenu">{{ t('nav.login') }}</router-link>
+              <router-link to="/signup" class="btn-signup" @click="closeMenu">{{ t('nav.signup') }}</router-link>
             </template>
           </div>
         </nav>
@@ -46,15 +65,15 @@
         <div class="auth-buttons">
           <template v-if="userLoggedIn">
             <button @click="toggleNotificationPanel" class="btn-notification">
-              Paziņojumi
+              {{ t('nav.notifications') }}
               <span v-if="unreadNotifications" class="notification-badge">{{ unreadNotifications }}</span>
             </button>
-            <router-link to="/account" class="btn-account">Mans konts</router-link>
-            <router-link v-if="userIsAdmin" to="/admin" class="btn-admin">Admin</router-link>
+            <router-link to="/account" class="btn-account">{{ t('nav.account') }}</router-link>
+            <router-link v-if="userIsAdmin" to="/admin" class="btn-admin">{{ t('nav.admin') }}</router-link>
           </template>
           <template v-else>
-            <router-link to="/login" class="btn-login">Pierakstīties</router-link>
-            <router-link to="/signup" class="btn-signup">Reģistrējieties</router-link>
+            <router-link to="/login" class="btn-login">{{ t('nav.login') }}</router-link>
+            <router-link to="/signup" class="btn-signup">{{ t('nav.signup') }}</router-link>
           </template>
         </div>
       </div>
@@ -85,17 +104,17 @@
                 </svg>
               </span>
               <div>
-                <h2 id="notif-panel-title" class="notification-panel__title">Paziņojumi</h2>
-                <p class="notification-panel__subtitle">No administrācijas</p>
+                <h2 id="notif-panel-title" class="notification-panel__title">{{ t('notif.title') }}</h2>
+                <p class="notification-panel__subtitle">{{ t('notif.subtitle') }}</p>
               </div>
             </div>
-            <button type="button" @click="closeNotificationPanel" class="notification-panel__close" aria-label="Aizvērt">
+            <button type="button" @click="closeNotificationPanel" class="notification-panel__close" :aria-label="t('notif.close')">
               <span aria-hidden="true">×</span>
             </button>
           </div>
           <div v-if="notificationList.length === 0" class="notification-panel__empty">
-            <p class="notification-panel__empty-title">Viss skaidrs</p>
-            <p class="notification-panel__empty-text">Šobrīd nav jaunu ziņu.</p>
+            <p class="notification-panel__empty-title">{{ t('notif.emptyTitle') }}</p>
+            <p class="notification-panel__empty-text">{{ t('notif.emptyText') }}</p>
           </div>
           <ul v-else class="notification-panel__list" role="list">
             <li
@@ -126,8 +145,8 @@
               <button
                 type="button"
                 class="notification-panel__dismiss"
-                title="Dzēst paziņojumu"
-                aria-label="Dzēst paziņojumu"
+                :title="t('notif.dismiss')"
+                :aria-label="t('notif.dismiss')"
                 @click.stop="deleteUserNotification(notification.id)"
               >
                 <span aria-hidden="true">×</span>
@@ -156,8 +175,11 @@
 import SupportChatWidget from '@/components/SupportChatWidget.vue'
 import { getStoredUser, refreshSessionUser } from '@/api/authApi'
 import { fetchMyNotifications } from '@/api/restApi'
+import { translate } from '@/i18n/siteMessages'
+import { useLocaleStore } from '@/stores/locale'
 import { clearLoggedInUserIfBlocked, isUserLoggedIn } from '@/utils/authStorage'
 import { removeNotificationForUser } from '@/utils/contactMessages'
+import { mapState } from 'pinia'
 
 export default {
   name: 'App',
@@ -178,6 +200,8 @@ export default {
     }
   },
   mounted() {
+    const loc = useLocaleStore()
+    loc.setLang(loc.lang)
     void this.enforceBlockState()
     void this.refreshNotifications()
     window.addEventListener('storage', this.onStorageChange)
@@ -196,6 +220,10 @@ export default {
     },
   },
   computed: {
+    ...mapState(useLocaleStore, ['lang']),
+    t() {
+      return (key) => translate(this.lang, key)
+    },
     showSupportChat() {
       return this.userLoggedIn && !this.$route.path.startsWith('/admin')
     },
@@ -285,9 +313,14 @@ export default {
     },
     notificationTypeLabel(notification) {
       if (notification.source === 'admin_role_grant') {
-        return 'Administratora piekļuve'
+        return translate(this.lang, 'notif.tagAdmin')
       }
-      return notification.status === 'approved' ? 'Apstiprināts' : 'Noraidīts'
+      return notification.status === 'approved'
+        ? translate(this.lang, 'notif.tagApproved')
+        : translate(this.lang, 'notif.tagDeclined')
+    },
+    setSiteLang(code) {
+      useLocaleStore().setLang(code)
     },
     closeNotificationPanel() {
       this.showNotificationPanel = false
@@ -303,12 +336,13 @@ export default {
     },
     formatDropdownDate(value) {
       if (!value) return ''
-      return new Date(value).toLocaleString('lv-LV', {
+      const loc = this.lang === 'en' ? 'en-GB' : 'lv-LV'
+      return new Date(value).toLocaleString(loc, {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
       })
     },
     goHome() {
@@ -361,8 +395,9 @@ body {
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px));
   width: 100%;
+  box-sizing: border-box;
 }
 
 /* Tikai galvenā navigācija — NEVIS visi <header> (mājas sadaļām ir savs <header class="hp-sechead">). */
@@ -370,7 +405,10 @@ body {
   position: sticky;
   top: 0;
   z-index: 1000;
-  padding: 0.85rem 0;
+  padding-top: max(0.85rem, env(safe-area-inset-top, 0px));
+  padding-bottom: 0.85rem;
+  padding-left: 0;
+  padding-right: 0;
   /* Tā pati bāze kā mājas lapai (#0a0a0c), ne zilpelēcīgs gradients */
   background-color: var(--hp-bg);
   background-image: radial-gradient(
@@ -389,6 +427,41 @@ body {
   text-transform: uppercase;
   color: var(--hp-gold);
   user-select: none;
+}
+
+.lang-switch {
+  display: inline-flex;
+  flex-shrink: 0;
+  margin-left: 0.75rem;
+  margin-right: 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--hp-line-strong);
+  overflow: hidden;
+  background: var(--hp-surface);
+}
+
+.lang-switch__btn {
+  padding: 0.35rem 0.7rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  border: none;
+  background: transparent;
+  color: var(--hp-muted);
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.lang-switch__btn:hover {
+  color: var(--hp-text);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.lang-switch__btn--active {
+  background: rgba(245, 204, 76, 0.18);
+  color: var(--hp-gold);
 }
 
 .nav {
@@ -843,15 +916,6 @@ body {
   border-color: rgba(248, 113, 113, 0.35);
 }
 
-@media (max-width: 768px) {
-  .notification-panel {
-    left: 50%;
-    right: auto;
-    transform: translateX(-50%);
-    width: min(400px, calc(100vw - 20px));
-  }
-}
-
 footer {
   background-color: var(--hp-bg);
   background-image: radial-gradient(
@@ -875,8 +939,39 @@ footer {
 }
 
 @media (max-width: 768px) {
+  html {
+    scroll-padding-top: 4.75rem;
+  }
+
+  .nav {
+    gap: 0.4rem;
+    align-items: center;
+  }
+
+  .brand {
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
+    line-height: 1.2;
+    max-width: min(38vw, 6.5rem);
+    white-space: normal;
+    word-break: break-word;
+    hyphens: auto;
+  }
+
+  .lang-switch {
+    margin-left: 0.25rem;
+    margin-right: 0.15rem;
+  }
+
+  .lang-switch__btn {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.62rem;
+  }
+
   .hamburger {
     display: flex;
+    flex-shrink: 0;
+    margin-left: auto;
   }
 
   .auth-buttons {
@@ -888,7 +983,8 @@ footer {
     top: 0;
     right: -100%;
     height: 100vh;
-    width: 70%;
+    height: 100dvh;
+    width: min(300px, calc(100vw - 3rem));
     max-width: 300px;
     background-color: var(--hp-bg);
     background-image: radial-gradient(
@@ -897,7 +993,8 @@ footer {
       transparent 55%
     );
     transition: right 0.3s ease;
-    padding-top: 80px;
+    padding-top: max(5rem, calc(env(safe-area-inset-top, 0px) + 3.25rem));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
     border-left: 1px solid var(--hp-line-strong);
     box-shadow: -12px 0 40px rgba(0, 0, 0, 0.45);
   }
@@ -953,6 +1050,13 @@ footer {
     padding: 0.85rem 1rem;
     box-sizing: border-box;
     border-radius: 999px;
+  }
+
+  .notification-panel {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: min(400px, calc(100vw - max(24px, env(safe-area-inset-left, 0px) + env(safe-area-inset-right, 0px))));
   }
 }
 </style>

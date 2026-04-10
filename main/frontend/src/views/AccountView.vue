@@ -3,54 +3,53 @@
     <div class="account-box">
       <div class="account-header">
         <div>
-          <h1>Mans konts</h1>
+          <h1>{{ t('account.title') }}</h1>
         </div>
         <div class="header-actions">
-          
-          <button type="button" @click="logout" class="btn-account-logout">Iziet</button>
+          <button type="button" @click="logout" class="btn-account-logout">{{ t('account.logout') }}</button>
         </div>
       </div>
 
       <div class="account-body">
         <div class="account-info">
           <div class="info-row">
-            <span class="info-label">Vārds un uzvārds: </span>
-            <span class="info-value">{{ name || 'Nav pieejams' }}</span>
+            <span class="info-label">{{ t('account.nameLabel') }}</span>
+            <span class="info-value">{{ name || t('account.noName') }}</span>
           </div>
           <div class="info-row">
-            <span class="info-label">E-pasts: </span>
+            <span class="info-label">{{ t('account.emailLabel') }}</span>
             <span class="info-value">{{ email }}</span>
           </div>
           <p class="account-chat-hint">
-            Support čatu atver ar peldošo „Support” pogu lapas apakšējā labajā stūrī.
+            {{ t('account.chatHint') }}
           </p>
           <p v-if="$route.query.noadmin === '1'" class="account-noadmin-note">
-            Administratora panelis jums nav pieejams. Ja nepieciešams, lūdziet administratoram piešķirt tiesības.
+            {{ t('account.noadminNote') }}
           </p>
         </div>
 
         <div class="adoption-section">
-          <h2>Izvēlētais dzīvnieks</h2>
+          <h2>{{ t('account.adoptionTitle') }}</h2>
 
           <div v-if="adoptions.length" class="adoption-list">
             <div class="adoption-card" v-for="adoption in adoptions" :key="adoption.id">
               <div class="animal-image">
-                <img :src="adoption.animalImage" :alt="adoption.animalName" />
+                <img :src="adoption.animalImage || fallbackAnimalImg" :alt="adoption.animalName" />
               </div>
               <div class="animal-details">
                 <h3>{{ adoption.animalName }}</h3>
-                <p><strong>Pieteikuma datums:</strong> {{ formatDate(adoption.submittedAt) }}</p>
-                <button class="btn-release" @click="releaseAdoption(adoption.id)">Atteikties</button>
+                <p><strong>{{ t('account.submittedAt') }}</strong> {{ formatDate(adoption.submittedAt) }}</p>
+                <button class="btn-release" @click="releaseAdoption(adoption.id)">{{ t('account.withdraw') }}</button>
               </div>
             </div>
           </div>
 
-          <p v-else class="no-adoption">Jums vēl nav izvēlēts dzīvnieks.</p>
+          <p v-else class="no-adoption">{{ t('account.noAdoption') }}</p>
         </div>
 
         <div class="notifications-section">
-          <h2>Paziņojumi</h2>
-          <p v-if="!notifications.length" class="no-adoption">Nav paziņojumu.</p>
+          <h2>{{ t('account.notificationsTitle') }}</h2>
+          <p v-if="!notifications.length" class="no-adoption">{{ t('account.noNotifications') }}</p>
           <div v-else class="notification-account-list">
             <div
               v-for="note in notifications"
@@ -68,8 +67,8 @@
                 <button
                   type="button"
                   class="notification-delete-btn"
-                  title="Dzēst"
-                  aria-label="Dzēst paziņojumu"
+                  :title="t('account.notifDelete')"
+                  :aria-label="t('account.notifDeleteAria')"
                   @click="deleteNotification(note.id)"
                 >
                   ×
@@ -91,8 +90,11 @@ import {
   fetchMyNotifications,
   markMyNotificationsRead,
 } from '@/api/restApi'
+import { translate } from '@/i18n/siteMessages'
+import { useLocaleStore } from '@/stores/locale'
 import { clearLoggedInUserIfBlocked, isUserLoggedIn } from '@/utils/authStorage'
 import { removeNotificationForUser } from '@/utils/contactMessages'
+import { mapState } from 'pinia'
 
 export default {
   name: 'AccountView',
@@ -117,6 +119,14 @@ export default {
     window.removeEventListener('authUpdated', this.onAuthUpdated)
   },
   computed: {
+    ...mapState(useLocaleStore, ['lang']),
+    t() {
+      return (key) => translate(this.lang, key)
+    },
+    fallbackAnimalImg() {
+      const label = encodeURIComponent(translate(this.lang, 'account.imgFallback'))
+      return `https://via.placeholder.com/180?text=${label}`
+    },
     unreadNotifications() {
       return this.notifications.filter((note) => !note.read).length
     },
@@ -148,9 +158,7 @@ export default {
         const rows = await fetchMyApplications()
         this.adoptions = rows.map((adoption) => ({
           ...adoption,
-          animalImage:
-            adoption.animalImage ||
-            'https://via.placeholder.com/180?text=Dzīvnieks',
+          animalImage: adoption.animalImage || null,
         }))
       } catch {
         this.adoptions = []
@@ -172,9 +180,9 @@ export default {
     },
     notificationTitle(note) {
       if (note.source === 'admin_role_grant') {
-        return 'Administratora piekļuve'
+        return translate(this.lang, 'account.notifAdminRole')
       }
-      return 'Ziņojums no administrācijas'
+      return translate(this.lang, 'account.notifFromAdmin')
     },
     onStorageChange(event) {
       if (event.key === 'spa_auth_token' || event.key === 'spa_auth_user') {
@@ -201,7 +209,8 @@ export default {
     },
     formatDate(value) {
       if (!value) return ''
-      return new Date(value).toLocaleString('lv-LV', {
+      const loc = this.lang === 'en' ? 'en-GB' : 'lv-LV'
+      return new Date(value).toLocaleString(loc, {
         year: 'numeric',
         month: 'long',
         day: 'numeric',

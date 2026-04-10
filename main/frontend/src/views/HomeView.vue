@@ -5,38 +5,38 @@
       <div class="hp-hero__mesh" aria-hidden="true" />
       <div class="container hp-hero__inner">
         <div class="hp-hero__copy">
-          <p class="hp-hero__eyebrow">Laimīgās Ķepas · adopcijas centrs</p>
+          <p class="hp-hero__eyebrow">{{ t('hero.eyebrow') }}</p>
           <h1 id="hero-heading" class="hp-hero__title">
-            <span class="hp-hero__title-line">Katrai ķepai —</span>
-            <span class="hp-hero__title-script">savas mājas</span>
+            <span class="hp-hero__title-line">{{ t('hero.title1') }}</span>
+            <span class="hp-hero__title-script">{{ t('hero.title2') }}</span>
           </h1>
           <p class="hp-hero__lead">
-            Mēs savienojam pamestos un neaprūpētos dzīvniekus ar ģimenēm, kas gatavas mīlestībai. Katrs profils ir īsts — dati tiešā veidā no mūsu sistēmas.
+            {{ t('hero.lead') }}
           </p>
           <div class="hp-hero__actions">
             <button type="button" class="hp-btn hp-btn--primary hp-hero__btn" @click.prevent="scrollToSection('animals')">
-              Izvēlēties draugu
+              {{ t('hero.ctaPick') }}
             </button>
             <button type="button" class="hp-btn hp-btn--ghost hp-hero__btn hp-hero__btn--ghost" @click.prevent="scrollToSection('how')">
-              Kā tas darbojas
+              {{ t('hero.ctaHow') }}
             </button>
           </div>
           <div v-if="stats" class="hp-statbar hp-statbar--hero" role="list">
             <div class="hp-statbar__cell" role="listitem">
               <span class="hp-statbar__num">{{ stats.animals_available }}</span>
-              <span class="hp-statbar__lbl">gaida mājas</span>
+              <span class="hp-statbar__lbl">{{ t('stats.waiting') }}</span>
             </div>
             <div class="hp-statbar__cell" role="listitem">
               <span class="hp-statbar__num">{{ stats.animals_total }}</span>
-              <span class="hp-statbar__lbl">kopā aprūpē</span>
+              <span class="hp-statbar__lbl">{{ t('stats.inCare') }}</span>
             </div>
             <div class="hp-statbar__cell" role="listitem">
               <span class="hp-statbar__num">{{ stats.adoption_applications_total }}</span>
-              <span class="hp-statbar__lbl">pieteikumi</span>
+              <span class="hp-statbar__lbl">{{ t('stats.apps') }}</span>
             </div>
             <div class="hp-statbar__cell" role="listitem">
               <span class="hp-statbar__num">{{ stats.registered_users_total }}</span>
-              <span class="hp-statbar__lbl">kopienas biedri</span>
+              <span class="hp-statbar__lbl">{{ t('stats.members') }}</span>
             </div>
           </div>
           <div v-else-if="statsLoading" class="hp-statbar hp-statbar--hero hp-statbar--skel" aria-hidden="true">
@@ -47,22 +47,22 @@
           <figure class="hp-hero__visual">
             <img
               src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=1100&q=85"
-              alt="Suni laukā — draudzīgi un gatavi jaunām mājām"
+              :alt="t('hero.imgAlt')"
               width="1100"
               height="733"
               loading="eager"
               decoding="async"
             />
             <figcaption class="hp-hero__caption">
-              <strong>Īsta aprūpe</strong>
-              <span>Veterinārā kontrole · sociālā adaptācija</span>
+              <strong>{{ t('hero.captionStrong') }}</strong>
+              <span>{{ t('hero.captionSub') }}</span>
             </figcaption>
           </figure>
         </div>
       </div>
     </section>
 
-    <section class="hp-trust" aria-label="Iemesli uzticēties">
+    <section class="hp-trust" :aria-label="t('trust.aria')">
       <div class="container hp-trust__grid">
         <article class="hp-trust__card">
           <div class="hp-trust__icon" aria-hidden="true">
@@ -71,8 +71,8 @@
               <path d="M18 24l4 4 8-10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
           </div>
-          <h3 class="hp-trust__title">Drošība</h3>
-          <p class="hp-trust__text">Veselības pārbaude, vakcinācija un uzraudzība pirms došanās jaunajās mājās.</p>
+          <h3 class="hp-trust__title">{{ t('trust.safety.title') }}</h3>
+          <p class="hp-trust__text">{{ t('trust.safety.text') }}</p>
         </article>
         <article class="hp-trust__card">
           <div class="hp-trust__icon" aria-hidden="true">
@@ -81,8 +81,8 @@
               <circle cx="24" cy="22" r="5" stroke="currentColor" stroke-width="2.2" />
             </svg>
           </div>
-          <h3 class="hp-trust__title">Atbilstība</h3>
-          <p class="hp-trust__text">Izvērtējam dzīves apstākļus un pieredzi, lai sakristu gan cilvēkam, gan dzīvniekam.</p>
+          <h3 class="hp-trust__title">{{ t('trust.match.title') }}</h3>
+          <p class="hp-trust__text">{{ t('trust.match.text') }}</p>
         </article>
         <article class="hp-trust__card">
           <div class="hp-trust__icon" aria-hidden="true">
@@ -90,8 +90,8 @@
               <path d="M6 20h10l4-12 6 28 4-16h12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
           </div>
-          <h3 class="hp-trust__title">Atbalsts</h3>
-          <p class="hp-trust__text">Palīdzam arī pēc adopcijas — jautājumi un konsultācijas paliek pieejamas.</p>
+          <h3 class="hp-trust__title">{{ t('trust.support.title') }}</h3>
+          <p class="hp-trust__text">{{ t('trust.support.text') }}</p>
         </article>
       </div>
     </section>
@@ -99,29 +99,29 @@
     <section id="how" class="hp-steps">
       <div class="container">
         <header class="hp-sechead">
-          <p class="hp-sechead__eyebrow">Process</p>
-          <h2 class="hp-sechead__title">No pirmā skatiena līdz kopīgam mājas sofā</h2>
+          <p class="hp-sechead__eyebrow">{{ t('steps.eyebrow') }}</p>
+          <h2 class="hp-sechead__title">{{ t('steps.title') }}</h2>
         </header>
         <ol class="hp-steps__list">
           <li class="hp-steps__item">
             <span class="hp-steps__bubble">01</span>
-            <h3 class="hp-steps__name">Iepazīsties</h3>
-            <p class="hp-steps__desc">Profili un foto no mūsu datubāzes — meklē pēc sugas un noskaņas.</p>
+            <h3 class="hp-steps__name">{{ t('steps.n1') }}</h3>
+            <p class="hp-steps__desc">{{ t('steps.d1') }}</p>
           </li>
           <li class="hp-steps__item">
             <span class="hp-steps__bubble">02</span>
-            <h3 class="hp-steps__name">Konts</h3>
-            <p class="hp-steps__desc">Reģistrējies un pieslēdzies, lai iesniegtu adopcijas pieteikumu.</p>
+            <h3 class="hp-steps__name">{{ t('steps.n2') }}</h3>
+            <p class="hp-steps__desc">{{ t('steps.d2') }}</p>
           </li>
           <li class="hp-steps__item">
             <span class="hp-steps__bubble">03</span>
-            <h3 class="hp-steps__name">Saruna</h3>
-            <p class="hp-steps__desc">Izrunājam jautājumus un piemērotību — pierakstījušies var rakstīt support čatā; citādi arī pa tālruni un e-pastu.</p>
+            <h3 class="hp-steps__name">{{ t('steps.n3') }}</h3>
+            <p class="hp-steps__desc">{{ t('steps.d3') }}</p>
           </li>
           <li class="hp-steps__item">
             <span class="hp-steps__bubble">04</span>
-            <h3 class="hp-steps__name">Mājas</h3>
-            <p class="hp-steps__desc">Satikšanās un jaunā ģimene. Pēcadopcijas atbalsts pieejams.</p>
+            <h3 class="hp-steps__name">{{ t('steps.n4') }}</h3>
+            <p class="hp-steps__desc">{{ t('steps.d4') }}</p>
           </li>
         </ol>
       </div>
@@ -131,29 +131,31 @@
       <div class="container">
         <header class="hp-sechead hp-sechead--row">
           <div>
-            <p class="hp-sechead__eyebrow">Šobrīd gaida</p>
-            <h2 class="hp-sechead__title">Izceltie draugi</h2>
+            <p class="hp-sechead__eyebrow">{{ t('spotlight.eyebrow') }}</p>
+            <h2 class="hp-sechead__title">{{ t('spotlight.title') }}</h2>
           </div>
           <button type="button" class="hp-btn hp-btn--ghost hp-btn--sm" @click.prevent="scrollToSection('animals')">
-            Skatīt visus
+            {{ t('spotlight.all') }}
           </button>
         </header>
-        <div class="hp-spotlight__row">
-          <button
-            v-for="animal in spotlightAnimals"
-            :key="animal.id"
-            type="button"
-            class="hp-spot"
-            @click="openModal(animal)"
-          >
-            <span class="hp-spot__img">
-              <img :src="animal.image" :alt="animal.name" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
-            </span>
-            <span class="hp-spot__meta">
-              <span class="hp-spot__species">{{ animal.species }}</span>
-              <span class="hp-spot__name">{{ animal.name }}</span>
-            </span>
-          </button>
+        <div class="hp-spotlight-scroll">
+          <div class="hp-spotlight__row">
+            <button
+              v-for="animal in spotlightAnimals"
+              :key="animal.id"
+              type="button"
+              class="hp-spot"
+              @click="openModal(animal)"
+            >
+              <span class="hp-spot__img">
+                <img :src="animal.image" :alt="animal.name" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+              </span>
+              <span class="hp-spot__meta">
+                <span class="hp-spot__species">{{ speciesLabel(animal.species) }}</span>
+                <span class="hp-spot__name">{{ animal.name }}</span>
+              </span>
+            </button>
+          </div>
         </div>
       </div>
     </section>
@@ -161,10 +163,10 @@
     <section class="hp-catalog" id="animals">
       <div class="container">
         <header class="hp-sechead">
-          <p class="hp-sechead__eyebrow">Katalogs</p>
-          <h2 class="hp-sechead__title">Meklē savu ķepu</h2>
+          <p class="hp-sechead__eyebrow">{{ t('catalog.eyebrow') }}</p>
+          <h2 class="hp-sechead__title">{{ t('catalog.title') }}</h2>
           <p class="hp-sechead__sub">
-            Saraksts un pieejamība atjaunojas no servera reāllaikā.
+            {{ t('catalog.sub') }}
           </p>
         </header>
 
@@ -178,7 +180,7 @@
               v-model="searchQuery"
               type="search"
               class="hp-search__input"
-              placeholder="Meklēt pēc vārda, apraksta, dzimuma…"
+              :placeholder="t('search.placeholder')"
               autocomplete="off"
             />
           </div>
@@ -187,7 +189,7 @@
             class="hp-search__select hp-species-dd"
             :class="{ 'hp-species-dd--open': speciesDropdownOpen }"
           >
-            <span id="species-filter-label" class="visually-hidden">Filtrēt pēc sugas</span>
+            <span id="species-filter-label" class="visually-hidden">{{ t('species.filterAria') }}</span>
             <button
               id="species-filter-trigger"
               type="button"
@@ -217,7 +219,7 @@
                   </svg>
                 </span>
                 <span class="hp-species-dd__label">
-                  <span class="hp-species-dd__label-k">Suga</span>
+                  <span class="hp-species-dd__label-k">{{ t('species.kind') }}</span>
                   <span class="hp-species-dd__label-v">{{ speciesFilterLabel }}</span>
                 </span>
               </span>
@@ -251,7 +253,7 @@
                     @click="selectSpecies('')"
                   >
                     <span class="hp-species-dd__opt-main">
-                      <span class="hp-species-dd__opt-title">Visas sugas</span>
+                      <span class="hp-species-dd__opt-title">{{ t('species.all') }}</span>
                       <span class="hp-species-dd__pill">{{ animals.length }}</span>
                     </span>
                     <span v-if="!selectedSpecies" class="hp-species-dd__check" aria-hidden="true">✓</span>
@@ -267,7 +269,7 @@
                     @click="selectSpecies(sp)"
                   >
                     <span class="hp-species-dd__opt-main">
-                      <span class="hp-species-dd__opt-title">{{ sp }}</span>
+                      <span class="hp-species-dd__opt-title">{{ speciesLabel(sp) }}</span>
                       <span class="hp-species-dd__pill">{{ countBySpecies(sp) }}</span>
                     </span>
                     <span v-if="selectedSpecies === sp" class="hp-species-dd__check" aria-hidden="true">✓</span>
@@ -278,48 +280,50 @@
           </div>
         </div>
 
-        <div class="hp-grid">
-          <article
-            v-for="animal in filteredAnimals"
-            :key="animal.id"
-            class="hp-card"
-          >
-            <div class="hp-card__media">
-              <img
-                :src="animal.image"
-                :alt="animal.name"
-                loading="lazy"
-                decoding="async"
-                referrerpolicy="no-referrer"
-              />
-              <div v-if="isTaken(animal.id)" class="hp-card__ribbon">Rezervēts</div>
-            </div>
-            <div class="hp-card__body">
-              <p class="hp-card__species">{{ animal.species }}</p>
-              <h3 class="hp-card__name">{{ animal.name }}</h3>
-              <p class="hp-card__desc">{{ animal.description }}</p>
-              <p class="hp-card__meta"><span>Dzimums</span> {{ animal.gender || '—' }}</p>
-              <button
-                type="button"
-                class="hp-btn hp-btn--card"
-                :disabled="isTaken(animal.id)"
-                @click="openModal(animal)"
-              >
-                {{ isTaken(animal.id) ? 'Aizņemts' : 'Atvērt profilu' }}
-              </button>
-            </div>
-          </article>
+        <div class="hp-grid-scroll">
+          <div class="hp-grid">
+            <article
+              v-for="animal in filteredAnimals"
+              :key="animal.id"
+              class="hp-card"
+            >
+              <div class="hp-card__media">
+                <img
+                  :src="animal.image"
+                  :alt="animal.name"
+                  loading="lazy"
+                  decoding="async"
+                  referrerpolicy="no-referrer"
+                />
+                <div v-if="isTaken(animal.id)" class="hp-card__ribbon">{{ t('card.ribbon') }}</div>
+              </div>
+              <div class="hp-card__body">
+                <p class="hp-card__species">{{ speciesLabel(animal.species) }}</p>
+                <h3 class="hp-card__name">{{ animal.name }}</h3>
+                <p class="hp-card__desc">{{ animal.description }}</p>
+                <p class="hp-card__meta"><span>{{ t('card.gender') }}</span> {{ animal.gender || '—' }}</p>
+                <button
+                  type="button"
+                  class="hp-btn hp-btn--card"
+                  :disabled="isTaken(animal.id)"
+                  @click="openModal(animal)"
+                >
+                  {{ isTaken(animal.id) ? t('card.taken') : t('card.open') }}
+                </button>
+              </div>
+            </article>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="hp-quote" aria-label="Atsauksme">
+    <section class="hp-quote" :aria-label="t('quote.aria')">
       <div class="hp-quote__deco" aria-hidden="true">“</div>
       <div class="container hp-quote__inner">
         <blockquote class="hp-quote__text">
-          Adopcija nav pirkums — tā ir solījums. Paldies komandai par pacietību un skaidro procesu; mūsu suns jau ir mājas sirds.
+          {{ t('quote.text') }}
         </blockquote>
-        <cite class="hp-quote__cite">— adoptētāju ģimene, Rīga</cite>
+        <cite class="hp-quote__cite">{{ t('quote.cite') }}</cite>
       </div>
     </section>
 
@@ -329,7 +333,7 @@
           <div class="hp-about__frame">
             <img
               src="https://images.unsplash.com/photo-1601758228041-f3b2795255f1?auto=format&fit=crop&w=900&q=85"
-              alt="Suns un saimnieks"
+              :alt="t('about.imgAlt')"
               loading="lazy"
               width="900"
               height="1125"
@@ -338,17 +342,17 @@
         </div>
         <div class="hp-about__content">
           <header class="hp-sechead hp-sechead--left">
-            <p class="hp-sechead__eyebrow">Par mums</p>
-            <h2 class="hp-sechead__title">Cieņa pret katru dzīvību</h2>
+            <p class="hp-sechead__eyebrow">{{ t('about.eyebrow') }}</p>
+            <h2 class="hp-sechead__title">{{ t('about.title') }}</h2>
           </header>
           <p class="hp-about__lead">
-            <strong>Laimīgās Ķepas</strong> ir vieta, kur dzīvnieki atgūst uzticību. Strādājam ar veterināriem un brīvprātīgajiem, lai katrs būtu vesels un emocionāli gatavs jaunajām mājām.
+            <strong>{{ t('about.leadStrong') }}</strong> {{ t('about.lead') }}
           </p>
           <ul class="hp-about__ticks">
-            <li>Strukturēta, mierīga vide</li>
-            <li>Vakcinācija un veselības uzraudzība</li>
-            <li>Socializācija un pozitīva stimulācija</li>
-            <li>Pēcadopcijas konsultācijas</li>
+            <li>{{ t('about.tick1') }}</li>
+            <li>{{ t('about.tick2') }}</li>
+            <li>{{ t('about.tick3') }}</li>
+            <li>{{ t('about.tick4') }}</li>
           </ul>
         </div>
       </div>
@@ -358,33 +362,33 @@
       <div class="container hp-contact__grid">
         <div class="hp-contact__aside">
           <header class="hp-sechead hp-sechead--left">
-            <p class="hp-sechead__eyebrow">Sazinies</p>
-            <h2 class="hp-sechead__title">Jautājumi pirms adopcijas?</h2>
+            <p class="hp-sechead__eyebrow">{{ t('contact.eyebrow') }}</p>
+            <h2 class="hp-sechead__title">{{ t('contact.title') }}</h2>
             <p class="hp-sechead__sub">
               <template v-if="userLoggedIn">
-                Pierakstījušies lietotāji var rakstīt komandai, izmantojot peldošo „Support” pogu lapas apakšējā labajā stūrī.
+                {{ t('contact.subIn') }}
               </template>
               <template v-else>
-                Pierakstieties, lai atvērtu tiešu support čatu ar komandu. Tālāk arī tālrunis un e-pasts.
+                {{ t('contact.subOut') }}
               </template>
             </p>
           </header>
           <div class="hp-contact__tiles">
             <div class="hp-contact__tile">
-              <h3>Adrese</h3>
+              <h3>{{ t('contact.addrTitle') }}</h3>
               <p>Torņukalns, Mārupes iela 19<br>Rīga, LV-1002</p>
             </div>
             <div class="hp-contact__tile">
-              <h3>Tālrunis</h3>
+              <h3>{{ t('contact.phoneTitle') }}</h3>
               <p><a href="tel:+37129316942">+371 29 316 942</a></p>
             </div>
             <div class="hp-contact__tile">
-              <h3>E-pasts</h3>
+              <h3>{{ t('contact.emailTitle') }}</h3>
               <p><a href="mailto:kontakti@dzivniekucentrs.lv">kontakti@dzivniekucentrs.lv</a></p>
             </div>
             <div class="hp-contact__tile">
-              <h3>Darba laiks</h3>
-              <p>Pk–Pt 10:00–18:00 · Sb 10:00–16:00 · Sv slēgts</p>
+              <h3>{{ t('contact.hoursTitle') }}</h3>
+              <p>{{ t('contact.hours') }}</p>
             </div>
           </div>
         </div>
@@ -421,18 +425,18 @@
           <div class="modal-content">
             <h3>{{ selectedAnimal.name }}</h3>
             <p>{{ selectedAnimal.description }}</p>
-            <p><strong>Dzimums:</strong> {{ selectedAnimal.gender }}</p>
+            <p><strong>{{ t('modal.gender') }}</strong> {{ selectedAnimal.gender }}</p>
             <template v-if="userLoggedIn">
               <button type="button" class="btn-adopt" @click="openAdoptionModal">
-                Pieteikties adopcijai
+                {{ t('modal.adopt') }}
               </button>
             </template>
             <template v-else>
               <p class="adopt-login-hint">
-                Lai pieteiktos adopcijai, vispirms izveidojiet kontu un pierakstieties.
+                {{ t('modal.adoptHint') }}
               </p>
-              <router-link class="btn-adopt btn-adopt-link" to="/login">Pierakstīties</router-link>
-              <router-link class="btn-adopt-secondary" to="/signup">Reģistrēties</router-link>
+              <router-link class="btn-adopt btn-adopt-link" to="/login">{{ t('modal.login') }}</router-link>
+              <router-link class="btn-adopt-secondary" to="/signup">{{ t('modal.signup') }}</router-link>
             </template>
           </div>
 
@@ -461,11 +465,11 @@
           </button>
 
           <div class="modal-content adoption-modal-body">
-            <h3>Pieteikšanās {{ selectedAnimal.name }} adopcijai</h3>
+            <h3>{{ adoptModalTitle }}</h3>
 
             <form class="adoption-form" @submit.prevent="submitAdoption">
               <div class="form-group">
-                <label for="adopt-name">Jūsu vārds</label>
+                <label for="adopt-name">{{ t('adopt.name') }}</label>
                 <input
                   id="adopt-name"
                   v-model="adoptionForm.name"
@@ -477,7 +481,7 @@
               </div>
 
               <div class="form-group">
-                <label for="adopt-email">E-pasts</label>
+                <label for="adopt-email">{{ t('adopt.email') }}</label>
                 <input
                   id="adopt-email"
                   v-model.trim="adoptionForm.email"
@@ -485,13 +489,13 @@
                   class="adoption-field"
                   inputmode="email"
                   autocomplete="email"
-                  placeholder="piemers@epasts.lv"
+                  :placeholder="t('adopt.emailPh')"
                   required
                 />
               </div>
 
               <div class="form-group">
-                <label for="adopt-phone">Telefons</label>
+                <label for="adopt-phone">{{ t('adopt.phone') }}</label>
                 <div class="phone-field">
                   <span class="phone-prefix" aria-hidden="true">+371</span>
                   <input
@@ -507,35 +511,35 @@
                     @input="onAdoptionPhoneInput"
                   />
                 </div>
-                <p class="field-hint">Tikai 8 cipari pēc +371</p>
+                <p class="field-hint">{{ t('adopt.phoneHint') }}</p>
               </div>
 
               <div class="form-group">
-                <label for="adopt-address">Dzīvojamā vieta</label>
+                <label for="adopt-address">{{ t('adopt.address') }}</label>
                 <input
                   id="adopt-address"
                   v-model="adoptionForm.address"
                   type="text"
                   class="adoption-field"
-                  placeholder="Pilsēta, iela"
+                  :placeholder="t('adopt.addressPh')"
                   autocomplete="street-address"
                   required
                 />
               </div>
 
               <div class="form-group">
-                <label for="adopt-exp">Vai ir pieredze ar dzīvniekiem? Ja jā, padalieties ar mums.</label>
+                <label for="adopt-exp">{{ t('adopt.exp') }}</label>
                 <textarea
                   id="adopt-exp"
                   v-model="adoptionForm.experience"
                   class="adoption-field"
-                  placeholder="Pastāstiet par savu pieredzi"
+                  :placeholder="t('adopt.expPh')"
                   rows="4"
                   required
                 ></textarea>
               </div>
 
-              <button type="submit" class="btn-send">Pieteikties</button>
+              <button type="submit" class="btn-send">{{ t('adopt.submit') }}</button>
             </form>
 
             <p v-if="adoptionMessage" :class="adoptionMessageType">{{ adoptionMessage }}</p>
@@ -557,7 +561,10 @@ import {
   fetchHomeStats,
   submitApplication,
 } from '@/api/restApi'
+import { translate } from '@/i18n/siteMessages'
+import { useLocaleStore } from '@/stores/locale'
 import { isUserLoggedIn } from '@/utils/authStorage'
+import { mapState } from 'pinia'
 
 export default {
 
@@ -610,42 +617,53 @@ export default {
     document.removeEventListener('click', this.onSpeciesFilterDocClick, true)
   },
 
+  computed: {
+    ...mapState(useLocaleStore, ['lang']),
+    t() {
+      return (key) => translate(this.lang, key)
+    },
+    adoptModalTitle() {
+      const name = this.selectedAnimal?.name || ''
+      return this.t('adopt.title').replace('{name}', name)
+    },
+    speciesOptions() {
+      const species = this.animals.map((animal) => animal.species || 'Cits')
+      return [...new Set(species)]
+    },
+    sortedSpeciesOptions() {
+      const loc = this.lang === 'en' ? 'en' : 'lv'
+      return [...this.speciesOptions].sort((a, b) => a.localeCompare(b, loc))
+    },
+    speciesFilterLabel() {
+      if (!this.selectedSpecies) return this.t('species.all')
+      return this.speciesLabel(this.selectedSpecies)
+    },
+    filteredAnimals() {
+      let list = this.animals
+      if (this.selectedSpecies) {
+        list = list.filter((animal) => (animal.species || 'Cits') === this.selectedSpecies)
+      }
+      if (!this.searchQuery) return list
+
+      const query = this.searchQuery.toLowerCase()
+      return list.filter(
+        (animal) =>
+          animal.name.toLowerCase().includes(query) ||
+          (animal.gender || '').toLowerCase().includes(query) ||
+          (animal.description || '').toLowerCase().includes(query),
+      )
+    },
+    spotlightAnimals() {
+      return this.animals.filter((a) => !this.isTaken(a.id)).slice(0, 3)
+    },
+  },
+
   watch: {
     $route() {
       this.refreshUserLoggedIn()
     },
     modalOpen(open) {
       if (open) this.speciesDropdownOpen = false
-    },
-  },
-
-  computed: {
-    speciesOptions() {
-      const species = this.animals.map(animal => animal.species || 'Cits')
-      return [...new Set(species)]
-    },
-    sortedSpeciesOptions() {
-      return [...this.speciesOptions].sort((a, b) => a.localeCompare(b, 'lv'))
-    },
-    speciesFilterLabel() {
-      return this.selectedSpecies || 'Visas sugas'
-    },
-    filteredAnimals() {
-      let list = this.animals
-      if (this.selectedSpecies) {
-        list = list.filter(animal => animal.species === this.selectedSpecies)
-      }
-      if (!this.searchQuery) return list
-
-      const query = this.searchQuery.toLowerCase()
-      return list.filter(animal =>
-        animal.name.toLowerCase().includes(query) ||
-        (animal.gender || '').toLowerCase().includes(query) ||
-        (animal.description || '').toLowerCase().includes(query),
-      )
-    },
-    spotlightAnimals() {
-      return this.animals.filter((a) => !this.isTaken(a.id)).slice(0, 3)
     },
   },
 
@@ -662,6 +680,9 @@ export default {
     },
     countBySpecies(sp) {
       return this.animals.filter((a) => (a.species || 'Cits') === sp).length
+    },
+    speciesLabel(sp) {
+      return sp === 'Cits' ? this.t('species.other') : sp
     },
     onSpeciesFilterDocClick(event) {
       const root = this.$refs.speciesFilterRoot
@@ -741,21 +762,21 @@ export default {
     async submitAdoption() {
       this.refreshUserLoggedIn()
       if (!this.userLoggedIn) {
-        this.adoptionMessage = 'Pieteikties adopcijai var tikai pierakstījušies lietotāji.'
+        this.adoptionMessage = translate(this.lang, 'adopt.error.login')
         this.adoptionMessageType = 'error'
         return
       }
 
       const email = this.adoptionForm.email.trim()
       if (!this.isValidAdoptionEmail(email)) {
-        this.adoptionMessage = 'Lūdzu, ievadiet derīgu e-pasta adresi (piemēram, vards@epasts.lv).'
+        this.adoptionMessage = translate(this.lang, 'adopt.error.email')
         this.adoptionMessageType = 'error'
         return
       }
 
       const digits = this.adoptionPhoneDigits.replace(/\D/g, '')
       if (digits.length !== 8) {
-        this.adoptionMessage = 'Lūdzu, ievadiet 8 ciparus pēc +371.'
+        this.adoptionMessage = translate(this.lang, 'adopt.error.phone')
         this.adoptionMessageType = 'error'
         return
       }
@@ -774,8 +795,7 @@ export default {
           experience: this.adoptionForm.experience || null,
         })
         await this.loadCatalog()
-        this.adoptionMessage =
-          'Paldies! Jūsu pieteikums tika saņemts. Mēs ar jums sazināsimies drīzumā!'
+        this.adoptionMessage = translate(this.lang, 'adopt.ok')
         this.adoptionMessageType = 'success'
       } catch (e) {
         this.adoptionMessage = firstValidationMessage(e)
@@ -802,8 +822,8 @@ export default {
       try {
         const { animals, takenAnimalIds } = await fetchAnimalsCatalog()
         this.animals = animals.map((animal) => ({
-          species: animal.species || 'Cits',
           ...animal,
+          species: animal.species || 'Cits',
         }))
         this.takenAnimalIds = takenAnimalIds
       } catch {

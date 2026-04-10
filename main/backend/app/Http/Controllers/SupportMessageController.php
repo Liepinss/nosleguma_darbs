@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ContactMessage;
+use App\Support\ActivityLogger;
 use Illuminate\Http\Request;
 
 class SupportMessageController extends Controller
@@ -26,6 +27,11 @@ class SupportMessageController extends Controller
             'status' => 'pending',
             'is_read' => false,
             'sent_at' => now(),
+        ]);
+
+        ActivityLogger::log($request, $user, 'support.ticket_submitted', [
+            'message_id' => $message->id,
+            'email' => $user->email,
         ]);
 
         return response()->json([

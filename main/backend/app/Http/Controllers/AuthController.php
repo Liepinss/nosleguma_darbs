@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Support\ActivityLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -25,6 +26,11 @@ class AuthController extends Controller
             'is_admin' => false,
         ]);
 
+        ActivityLogger::log($request, $user, 'user.register', [
+            'email' => $user->email,
+            'name' => $user->name,
+        ]);
+
         return response()->json([
             'user' => $this->userPayload($user),
         ], 201);
@@ -40,12 +46,18 @@ class AuthController extends Controller
         $user = User::where('email', $data['email'])->first();
 
         if (! $user || ! Hash::check($data['password'], $user->password)) {
+            ActivityLogger::log($request, null, 'user.login_failed', [
+                'email' => $data['email'],
+            ]);
             throw ValidationException::withMessages([
                 'email' => ['Nepareizs e-pasts vai parole.'],
             ]);
         }
 
         if ($user->is_blocked) {
+            ActivityLogger::log($request, $user, 'user.login_blocked', [
+                'email' => $user->email,
+            ]);
             throw ValidationException::withMessages([
                 'email' => ['Šis konts ir bloķēts. Piekļuve liegta.'],
             ]);
@@ -54,6 +66,10 @@ class AuthController extends Controller
         $user->forceFill(['last_login_at' => now()])->save();
 
         $token = $user->createToken('spa')->plainTextToken;
+
+        ActivityLogger::log($request, $user, 'user.login', [
+            'email' => $user->email,
+        ]);
 
         return response()->json([
             'token' => $token,
@@ -68,6 +84,7 @@ class AuthController extends Controller
         ]);
 
         if ($data['password'] !== config('admin.panel_password')) {
+            ActivityLogger::log($request, null, 'auth.admin_panel_login_failed', []);
             throw ValidationException::withMessages([
                 'password' => ['Nepareiza parole.'],
             ]);
@@ -90,6 +107,10 @@ class AuthController extends Controller
         $user->forceFill(['last_login_at' => now()])->save();
         $token = $user->createToken('admin-panel')->plainTextToken;
 
+        ActivityLogger::log($request, $user, 'auth.admin_panel_login', [
+            'email' => $user->email,
+        ]);
+
         return response()->json([
             'token' => $token,
             'user' => $this->userPayload($user),
@@ -100,6 +121,9 @@ class AuthController extends Controller
     {
         $user = $request->user();
         if ($user) {
+            ActivityLogger::log($request, $user, 'user.logout', [
+                'email' => $user->email,
+            ]);
             $user->forceFill(['last_logout_at' => now()])->save();
             $user->currentAccessToken()?->delete();
         }

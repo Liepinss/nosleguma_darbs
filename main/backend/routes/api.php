@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AdoptionApplicationController;
 use App\Http\Controllers\AnimalController;
@@ -42,6 +43,8 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/activity-logs', [ActivityLogController::class, 'index']);
+
     Route::get('/contact-messages', [ContactMessageController::class, 'adminIndex']);
     Route::patch('/contact-messages/{id}', [ContactMessageController::class, 'adminUpdate'])->whereNumber('id');
     Route::delete('/contact-messages/{id}', [ContactMessageController::class, 'adminDestroy'])->whereNumber('id');

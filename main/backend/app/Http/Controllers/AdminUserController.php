@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ContactMessage;
+use App\Support\ActivityLogger;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -50,6 +51,13 @@ class AdminUserController extends Controller
         }
 
         $target->save();
+
+        ActivityLogger::log($request, $request->user(), 'admin.user_updated', [
+            'target_user_id' => $target->id,
+            'target_email' => $target->email,
+            'target_name' => $target->name,
+            'changes' => $data,
+        ]);
 
         if (array_key_exists('is_admin', $data) && $data['is_admin'] && ! $wasAdmin) {
             ContactMessage::query()

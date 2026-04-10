@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AdoptionApplication;
+use App\Support\ActivityLogger;
 use App\Models\Animal;
 use Illuminate\Http\Request;
 
@@ -36,6 +37,13 @@ class AdoptionApplicationController extends Controller
 
         $application->load('animal');
 
+        ActivityLogger::log($request, $user, 'adoption.submitted', [
+            'application_id' => $application->id,
+            'animal_id' => $application->animal_id,
+            'animal_name' => $application->animal?->name,
+            'animal_image' => $application->animal?->image,
+        ]);
+
         return response()->json($this->applicationArray($application), 201);
     }
 
@@ -55,7 +63,15 @@ class AdoptionApplicationController extends Controller
         $application = AdoptionApplication::query()
             ->where('user_id', $request->user()->id)
             ->whereKey($id)
+            ->with('animal')
             ->firstOrFail();
+
+        ActivityLogger::log($request, $request->user(), 'adoption.withdrawn', [
+            'application_id' => $application->id,
+            'animal_id' => $application->animal_id,
+            'animal_name' => $application->animal?->name,
+            'animal_image' => $application->animal?->image,
+        ]);
 
         $application->delete();
 
@@ -69,8 +85,19 @@ class AdoptionApplicationController extends Controller
         return response()->json($rows->map(fn (AdoptionApplication $a) => $this->applicationArray($a)));
     }
 
-    public function adminDestroy(int $id)
+    public function adminDestroy(Request $request, int $id)
     {
+        $row = AdoptionApplication::query()->whereKey($id)->with('animal')->first();
+        if ($row) {
+            ActivityLogger::log($request, $request->user(), 'adoption.deleted_by_admin', [
+                'application_id' => $id,
+                'animal_id' => $row->animal_id,
+                'animal_name' => $row->animal?->name,
+                'animal_image' => $row->animal?->image,
+                'owner_user_id' => $row->user_id,
+            ]);
+        }
+
         AdoptionApplication::query()->whereKey($id)->delete();
 
         return response()->json(['ok' => true]);

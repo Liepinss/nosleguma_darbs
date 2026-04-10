@@ -1,54 +1,55 @@
 <template>
   <div class="signup-container">
     <div class="signup-box">
-      <h1>Reģistrējieties</h1>
+      <h1>{{ t('signup.title') }}</h1>
       <form @submit.prevent="handleSignup">
         <div class="form-group">
-          <label for="name">Vārds</label>
-          <input 
-            type="text" 
-            id="name" 
-            v-model="name" 
-            placeholder="Ievadiet vārdu"
+          <label for="name">{{ t('signup.name') }}</label>
+          <input
+            type="text"
+            id="name"
+            v-model="name"
+            :placeholder="t('signup.phName')"
             required
             class="vards"
           />
         </div>
         <div class="form-group">
-          <label for="email">E-pasts</label>
-          <input 
-            type="email" 
-            id="email" 
-            v-model="email" 
-            placeholder="Ievadiet e-pastu"
+          <label for="email">{{ t('signup.email') }}</label>
+          <input
+            type="email"
+            id="email"
+            v-model="email"
+            :placeholder="t('signup.phEmail')"
             required
           />
         </div>
         <div class="form-group">
-          <label for="password">Parole</label>
-          <input 
-            type="password" 
-            id="password" 
-            v-model="password" 
-            placeholder="Ievadiet paroli"
+          <label for="password">{{ t('signup.password') }}</label>
+          <input
+            type="password"
+            id="password"
+            v-model="password"
+            :placeholder="t('signup.phPassword')"
             required
           />
         </div>
         <div class="form-group">
-          <label for="confirm-password">Apstiprinājuma parole</label>
-          <input 
-            type="password" 
-            id="confirm-password" 
-            v-model="confirmPassword" 
-            placeholder="Atkārtojiet paroli"
+          <label for="confirm-password">{{ t('signup.confirm') }}</label>
+          <input
+            type="password"
+            id="confirm-password"
+            v-model="confirmPassword"
+            :placeholder="t('signup.phConfirm')"
             required
           />
         </div>
-        <button type="submit" class="btn-submit">Reģistrējieties</button>
+        <button type="submit" class="btn-submit">{{ t('signup.submit') }}</button>
       </form>
       <p v-if="message" :class="messageType === 'success' ? 'success-message' : 'error-message'">{{ message }}</p>
       <p class="switch-form">
-        Jau ir konts? <router-link to="/login">Pierakstieties</router-link>
+        {{ t('signup.hasAccount') }}
+        <router-link to="/login">{{ t('signup.goLogin') }}</router-link>
       </p>
     </div>
   </div>
@@ -57,6 +58,9 @@
 <script>
 import { firstValidationMessage } from '@/api/http'
 import { register } from '@/api/authApi'
+import { translate } from '@/i18n/siteMessages'
+import { useLocaleStore } from '@/stores/locale'
+import { mapState } from 'pinia'
 
 export default {
   name: 'SignupView',
@@ -67,13 +71,26 @@ export default {
       password: '',
       confirmPassword: '',
       message: '',
-      messageType: ''
+      messageType: '',
     }
+  },
+  computed: {
+    ...mapState(useLocaleStore, ['lang']),
+    t() {
+      return (key) => translate(this.lang, key)
+    },
+  },
+  watch: {
+    lang() {
+      if (this.messageType === 'success' && this.message) {
+        this.message = translate(this.lang, 'signup.success')
+      }
+    },
   },
   methods: {
     async handleSignup() {
       if (this.password !== this.confirmPassword) {
-        this.message = 'Paroles nesakrīt.'
+        this.message = translate(this.lang, 'signup.errMismatch')
         this.messageType = 'error'
         return
       }
@@ -85,7 +102,7 @@ export default {
           email: this.email.trim(),
           password: this.password,
         })
-        this.message = 'Reģistrācija veiksmīga! Lūdzu, pieslēdzieties.'
+        this.message = translate(this.lang, 'signup.success')
         this.messageType = 'success'
         setTimeout(() => {
           this.$router.push('/login')
@@ -95,7 +112,7 @@ export default {
         this.messageType = 'error'
       }
     },
-  }
+  },
 }
 </script>
 
