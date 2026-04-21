@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AdoptionApplication;
+use App\Models\ContactMessage;
 use App\Support\ActivityLogger;
 use App\Models\Animal;
 use Illuminate\Http\Request;
@@ -66,11 +67,26 @@ class AdoptionApplicationController extends Controller
             ->with('animal')
             ->firstOrFail();
 
+        if (! in_array($application->status, ['pending', 'approved'], true)) {
+            return response()->json(['message' => 'Šo pieteikumu nevar atsaukt.'], 422);
+        }
+
+        $wasApproved = $application->status === 'approved';
+
+        if ($wasApproved) {
+            ContactMessage::query()
+                ->where('email', $request->user()->email)
+                ->where('source', 'adoption_approved')
+                ->where('selected_animals', (string) $application->animal_id)
+                ->delete();
+        }
+
         ActivityLogger::log($request, $request->user(), 'adoption.withdrawn', [
             'application_id' => $application->id,
             'animal_id' => $application->animal_id,
             'animal_name' => $application->animal?->name,
             'animal_image' => $application->animal?->image,
+            'was_approved' => $wasApproved,
         ]);
 
         $application->delete();
@@ -101,6 +117,47 @@ class AdoptionApplicationController extends Controller
         AdoptionApplication::query()->whereKey($id)->delete();
 
         return response()->json(['ok' => true]);
+    }
+
+    public function adminApprove(Request $request, int $id)
+    {
+        $application = AdoptionApplication::query()
+            ->with(['animal', 'user'])
+            ->findOrFail($id);
+
+        if ($application->status !== 'pending') {
+            return response()->json(['message' => 'Pieteikums nav gaidīšanas režīmā.'], 422);
+        }
+
+        $application->forceFill(['status' => 'approved'])->save();
+
+        $animalName = $application->animal?->name ?? 'Dzīvnieks';
+        $user = $application->user;
+        if ($user) {
+            ContactMessage::create([
+                'user_id' => $user->id,
+                'name' => 'Administrators',
+                'email' => $user->email,
+                'message' => 'Jūsu adopcijas pieteikums dzīvniekam „'.$animalName.'” ir apstiprināts.',
+                'selected_animals' => (string) $application->animal_id,
+                'source' => 'adoption_approved',
+                'status' => 'approved',
+                'is_read' => false,
+                'sent_at' => now(),
+                'moderated_at' => now(),
+                'approved_at' => now(),
+            ]);
+        }
+
+        ActivityLogger::log($request, $request->user(), 'adoption.approved_by_admin', [
+            'application_id' => $application->id,
+            'animal_id' => $application->animal_id,
+            'animal_name' => $application->animal?->name,
+            'animal_image' => $application->animal?->image,
+            'owner_user_id' => $application->user_id,
+        ]);
+
+        return response()->json($this->applicationArray($application->fresh()->load('animal')));
     }
 
     /**

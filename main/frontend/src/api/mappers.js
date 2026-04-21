@@ -26,6 +26,7 @@ export function mapApplication(a) {
     address: a.address,
     experience: a.experience,
     submittedAt: a.submitted_at,
+    status: a.status ?? 'pending',
   }
 }
 

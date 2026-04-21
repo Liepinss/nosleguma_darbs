@@ -54,6 +54,32 @@ class AnimalController extends Controller
         return response()->json($this->animalArray($animal), 201);
     }
 
+    public function update(Request $request, int $id)
+    {
+        $animal = Animal::query()->findOrFail($id);
+
+        $data = $request->validate([
+            'name' => ['sometimes', 'required', 'string', 'max:255'],
+            'species' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'gender' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'age' => ['sometimes', 'nullable', 'integer', 'min:0'],
+            'description' => ['sometimes', 'nullable', 'string'],
+            'image' => ['sometimes', 'nullable', 'string', 'max:2048'],
+            'category_id' => ['sometimes', 'nullable', 'integer', 'exists:categories,id'],
+        ]);
+
+        $animal->fill($data);
+        $animal->save();
+
+        ActivityLogger::log($request, $request->user(), 'animal.updated', [
+            'animal_id' => $animal->id,
+            'animal_name' => $animal->name,
+            'animal_image' => $animal->image,
+        ]);
+
+        return response()->json($this->animalArray($animal));
+    }
+
     public function destroy(Request $request, int $id)
     {
         $a = Animal::query()->find($id);

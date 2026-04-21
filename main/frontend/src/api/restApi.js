@@ -120,8 +120,22 @@ export async function adminDeleteApplication(id) {
   await apiFetch(`/admin/applications/${id}`, { method: 'DELETE', admin: true })
 }
 
+export async function adminApproveApplication(id) {
+  const raw = await apiFetch(`/admin/applications/${id}/approve`, { method: 'POST', admin: true })
+  return mapApplication(raw)
+}
+
 export async function adminCreateAnimal(payload) {
   const raw = await apiFetch('/admin/animals', { method: 'POST', json: payload, admin: true })
+  return mapAnimal(raw)
+}
+
+export async function adminUpdateAnimal(id, payload) {
+  const raw = await apiFetch(`/admin/animals/${id}`, {
+    method: 'PATCH',
+    json: payload,
+    admin: true,
+  })
   return mapAnimal(raw)
 }
 

@@ -23,8 +23,12 @@
           </button>
         </div>
 
-        <button 
-          class="hamburger" 
+        <button
+          type="button"
+          class="hamburger"
+          :aria-expanded="menuOpen ? 'true' : 'false'"
+          aria-controls="site-primary-nav"
+          :aria-label="t('a11y.menuToggle')"
           @click="toggleMenu"
           :class="{ active: menuOpen }"
         >
@@ -33,7 +37,7 @@
           <span></span>
         </button>
 
-        <nav :class="{ open: menuOpen }">
+        <nav id="site-primary-nav" class="site-primary-nav" :class="{ open: menuOpen }" :aria-label="t('a11y.mainNav')">
           <ul class="menu">
             <li><a href="/" @click.prevent="goHome">{{ t('nav.home') }}</a></li>
             <li><a href="#how" @click="closeMenu">{{ t('nav.how') }}</a></li>
@@ -157,7 +161,7 @@
       </div>
     </header>
 
-    <main class="app-main">
+    <main id="main-content" class="app-main" tabindex="-1">
       <router-view />
     </main>
 
@@ -286,8 +290,9 @@ export default {
       }
       try {
         const list = await fetchMyNotifications()
-        this.headerNotifications = list
-        this.unreadNotifications = list.filter(
+        const filtered = list.filter((message) => message.source !== 'adoption_approved')
+        this.headerNotifications = filtered
+        this.unreadNotifications = filtered.filter(
           (message) =>
             ['approved', 'declined'].includes(message.status) && !message.read,
         ).length
@@ -314,6 +319,9 @@ export default {
     notificationTypeLabel(notification) {
       if (notification.source === 'admin_role_grant') {
         return translate(this.lang, 'notif.tagAdmin')
+      }
+      if (notification.source === 'adoption_approved') {
+        return translate(this.lang, 'notif.tagApproved')
       }
       return notification.status === 'approved'
         ? translate(this.lang, 'notif.tagApproved')
@@ -369,6 +377,8 @@ export default {
 html {
   /* Anchor saites (#how, #animals) neapstājas zem sticky galvenes */
   scroll-padding-top: 5.5rem;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -379,6 +389,7 @@ body {
 }
 
 #app {
+  position: relative;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -938,7 +949,7 @@ footer {
   font-weight: 600;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 992px) {
   html {
     scroll-padding-top: 4.75rem;
   }

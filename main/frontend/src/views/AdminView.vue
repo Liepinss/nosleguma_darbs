@@ -120,10 +120,33 @@
           </div>
           <div v-if="supportChatUserId" class="support-chat-pane">
             <header v-if="supportChatUser" class="support-chat-pane__head">
-              <p>
-                <strong>{{ supportChatUser.name }}</strong>
-                <span class="support-chat-pane__email">{{ supportChatUser.email }}</span>
-              </p>
+              <div class="support-chat-pane__head-main">
+                <p class="support-chat-pane__identity">
+                  <strong>{{ supportChatUser.name }}</strong>
+                  <span class="support-chat-pane__email">{{ supportChatUser.email }}</span>
+                </p>
+                <div
+                  v-if="supportPendingApplications.length"
+                  class="support-chat-pane__approvals"
+                  role="region"
+                  :aria-label="t('admin.support.pendingRegion')"
+                >
+                  <p class="support-chat-pane__approvals-title">{{ t('admin.support.pendingTitle') }}</p>
+                  <ul class="support-chat-pane__approvals-list">
+                    <li v-for="row in supportPendingApplications" :key="row.id" class="support-chat-pane__approval-row">
+                      <span class="support-chat-pane__approval-animal">{{ row.animalName }}</span>
+                      <button
+                        type="button"
+                        class="btn-approve-adoption"
+                        :disabled="supportApproveBusyId === row.id"
+                        @click="approveAdoptionFromChat(row.id)"
+                      >
+                        {{ supportApproveBusyId === row.id ? t('admin.support.approving') : t('admin.support.approve') }}
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              </div>
             </header>
             <div ref="supportScroll" class="support-chat-msgs">
               <div
@@ -167,6 +190,7 @@
               <span class="adoption-date">{{ formatDate(adoption.submittedAt) }}</span>
             </div>
             <p><strong>{{ t('admin.adopt.name') }}</strong> {{ adoption.name }}</p>
+            <p><strong>{{ t('admin.adopt.status') }}</strong> {{ adoption.status }}</p>
             <p><strong>{{ t('admin.adopt.email') }}</strong> {{ adoption.email }}</p>
             <p><strong>{{ t('admin.adopt.phone') }}</strong> {{ adoption.phone }}</p>
             <p><strong>{{ t('admin.adopt.address') }}</strong> {{ adoption.address }}</p>
@@ -177,29 +201,72 @@
         </div>
       </div>
       <div v-if="activeTab === 'animals'" class="tab-content">
-        <h2>{{ t('admin.an.addTitle') }}</h2>
+        <h2>{{ animalEditingId != null ? t('admin.an.editTitle') : t('admin.an.addTitle') }}</h2>
+        <p v-if="animalEditingId != null" class="animal-edit-banner" role="status">
+          {{ t('admin.an.editingBanner').replace('{name}', animalForm.name || '—') }}
+        </p>
         <div class="animal-form">
           <div class="form-row">
-            <label>{{ t('admin.an.name') }}</label>
-            <input v-model="animalForm.name" type="text" :placeholder="t('admin.an.phName')" />
+            <label for="admin-animal-name">{{ t('admin.an.name') }}</label>
+            <input
+              id="admin-animal-name"
+              v-model="animalForm.name"
+              type="text"
+              :placeholder="t('admin.an.phName')"
+              autocomplete="off"
+            />
           </div>
           <div class="form-row">
-            <label>{{ t('admin.an.gender') }}</label>
-            <input v-model="animalForm.gender" type="text" :placeholder="t('admin.an.phGender')" />
+            <label for="admin-animal-gender">{{ t('admin.an.gender') }}</label>
+            <input
+              id="admin-animal-gender"
+              v-model="animalForm.gender"
+              type="text"
+              :placeholder="t('admin.an.phGender')"
+              autocomplete="off"
+            />
           </div>
           <div class="form-row">
-            <label>{{ t('admin.an.category') }}</label>
-            <input v-model="animalForm.species" type="text" :placeholder="t('admin.an.phCat')" />
+            <label for="admin-animal-species">{{ t('admin.an.category') }}</label>
+            <input
+              id="admin-animal-species"
+              v-model="animalForm.species"
+              type="text"
+              :placeholder="t('admin.an.phCat')"
+              autocomplete="off"
+            />
           </div>
           <div class="form-row">
-            <label>{{ t('admin.an.desc') }}</label>
-            <textarea v-model="animalForm.description" :placeholder="t('admin.an.phDesc')"></textarea>
+            <label for="admin-animal-desc">{{ t('admin.an.desc') }}</label>
+            <textarea
+              id="admin-animal-desc"
+              v-model="animalForm.description"
+              :placeholder="t('admin.an.phDesc')"
+            ></textarea>
           </div>
           <div class="form-row">
-            <label>{{ t('admin.an.image') }}</label>
-            <input v-model="animalForm.image" type="text" :placeholder="t('admin.an.phUrl')" />
+            <label for="admin-animal-image">{{ t('admin.an.image') }}</label>
+            <input
+              id="admin-animal-image"
+              v-model="animalForm.image"
+              type="text"
+              :placeholder="t('admin.an.phUrl')"
+              autocomplete="off"
+            />
           </div>
-          <button @click="addAnimal" class="btn-save">{{ t('admin.an.save') }}</button>
+          <div class="animal-form-actions">
+            <button type="button" class="btn-save" @click="submitAnimal">
+              {{ animalEditingId != null ? t('admin.an.update') : t('admin.an.save') }}
+            </button>
+            <button
+              v-if="animalEditingId != null"
+              type="button"
+              class="btn-cancel-edit"
+              @click="cancelAnimalEdit"
+            >
+              {{ t('admin.an.cancelEdit') }}
+            </button>
+          </div>
         </div>
 
         <h2>{{ t('admin.an.listTitle') }}</h2>
@@ -223,7 +290,12 @@
                 <p>{{ animal.description }}</p>
               </div>
             </div>
-            <button type="button" @click="deleteAnimal(animal.id)" class="btn-delete">{{ t('admin.btn.delete') }}</button>
+            <div class="animal-item-actions">
+              <button type="button" class="btn-edit-animal" @click="startEditAnimal(animal)">
+                {{ t('admin.an.edit') }}
+              </button>
+              <button type="button" @click="deleteAnimal(animal.id)" class="btn-delete">{{ t('admin.btn.delete') }}</button>
+            </div>
           </div>
         </div>
       </div>
@@ -368,6 +440,7 @@
 import {
   adminCancelAdminRoleOffer,
   adminCreateAnimal,
+  adminUpdateAnimal,
   adminDeleteAnimal,
   adminDeleteApplication,
   adminDeleteContactMessage,
@@ -375,6 +448,7 @@ import {
   adminListActivityLogs,
   adminListApplications,
   adminListContactMessages,
+  adminApproveApplication,
   adminListSupportThreads,
   adminListUsers,
   adminPostSupportChat,
@@ -397,6 +471,7 @@ export default {
       storedAnimals: [],
       activeSessions: [],
       registeredUsers: [],
+      animalEditingId: null,
       animalForm: {
         name: '',
         gender: '',
@@ -407,6 +482,8 @@ export default {
       supportThreads: [],
       supportChatUserId: null,
       supportChatUser: null,
+      supportPendingApplications: [],
+      supportApproveBusyId: null,
       supportMessages: [],
       supportReply: '',
       activityLogs: [],
@@ -512,8 +589,12 @@ export default {
           return fill(this.t('admin.logs.detail.adoptionWithdrawn'))
         case 'adoption.deleted_by_admin':
           return fill(this.t('admin.logs.detail.adoptionDeletedAdmin'))
+        case 'adoption.approved_by_admin':
+          return fill(this.t('admin.logs.detail.adoptionApprovedAdmin'))
         case 'animal.created':
           return fill(this.t('admin.logs.detail.animalCreated'))
+        case 'animal.updated':
+          return fill(this.t('admin.logs.detail.animalUpdated'))
         case 'animal.deleted':
           return fill(this.t('admin.logs.detail.animalDeleted'))
         default:
@@ -548,16 +629,41 @@ export default {
     },
     async selectSupportThread(userId) {
       this.supportChatUserId = userId
+      this.supportApproveBusyId = null
       try {
         const d = await adminFetchSupportChat(userId)
         this.supportChatUser = d.user || null
         this.supportMessages = Array.isArray(d.messages) ? d.messages : []
+        const raw = d.pending_applications || d.pendingApplications || []
+        this.supportPendingApplications = Array.isArray(raw)
+          ? raw.map((p) => ({
+              id: p.id,
+              animalId: p.animal_id ?? p.animalId,
+              animalName: p.animal_name ?? p.animalName ?? '—',
+              submittedAt: p.submitted_at ?? p.submittedAt,
+            }))
+          : []
         this.$nextTick(() => this.scrollSupportChat())
       } catch {
         this.supportChatUser = null
         this.supportMessages = []
+        this.supportPendingApplications = []
       }
       await this.loadSupportChatThreads()
+    },
+    async approveAdoptionFromChat(applicationId) {
+      if (!applicationId || this.supportApproveBusyId != null) return
+      this.supportApproveBusyId = applicationId
+      try {
+        await adminApproveApplication(applicationId)
+        window.dispatchEvent(new Event('contactMessagesUpdated'))
+        await this.selectSupportThread(this.supportChatUserId)
+        await this.loadData()
+      } catch {
+        /* ignore */
+      } finally {
+        this.supportApproveBusyId = null
+      }
     },
     scrollSupportChat() {
       const el = this.$refs.supportScroll
@@ -605,33 +711,58 @@ export default {
       await this.loadUsersAdmin()
       window.dispatchEvent(new Event('contactMessagesUpdated'))
     },
-    async addAnimal() {
+    resetAnimalForm() {
+      this.animalEditingId = null
+      this.animalForm = {
+        name: '',
+        gender: '',
+        species: '',
+        description: '',
+        image: '',
+      }
+    },
+    startEditAnimal(animal) {
+      this.animalEditingId = animal.id
+      this.animalForm = {
+        name: animal.name || '',
+        gender: animal.gender || '',
+        species: animal.species || '',
+        description: animal.description || '',
+        image: animal.image || '',
+      }
+    },
+    cancelAnimalEdit() {
+      this.resetAnimalForm()
+    },
+    async submitAnimal() {
       if (!this.animalForm.name || !this.animalForm.image) {
         return
       }
+      const payload = {
+        name: this.animalForm.name,
+        species: this.animalForm.species || translate(this.lang, 'species.other'),
+        gender: this.animalForm.gender || translate(this.lang, 'admin.an.defaultGender'),
+        description: this.animalForm.description || translate(this.lang, 'admin.an.defaultDesc'),
+        image: this.animalForm.image,
+      }
       try {
-        await adminCreateAnimal({
-          name: this.animalForm.name,
-          species: this.animalForm.species || translate(this.lang, 'species.other'),
-          gender: this.animalForm.gender || translate(this.lang, 'admin.an.defaultGender'),
-          description: this.animalForm.description || translate(this.lang, 'admin.an.defaultDesc'),
-          image: this.animalForm.image,
-        })
+        if (this.animalEditingId != null) {
+          await adminUpdateAnimal(this.animalEditingId, payload)
+        } else {
+          await adminCreateAnimal(payload)
+        }
         await this.loadAnimals()
         window.dispatchEvent(new Event('animalsUpdated'))
-        this.animalForm = {
-          name: '',
-          gender: '',
-          species: '',
-          description: '',
-          image: '',
-        }
+        this.resetAnimalForm()
       } catch {
         /* ignore */
       }
     },
     async deleteAnimal(id) {
       try {
+        if (this.animalEditingId === id) {
+          this.resetAnimalForm()
+        }
         await adminDeleteAnimal(id)
         await this.loadAnimals()
         window.dispatchEvent(new Event('animalsUpdated'))
@@ -895,6 +1026,25 @@ export default {
   color: var(--hp-gold, #f5cc4c);
 }
 
+.animal-edit-banner {
+  margin: -0.5rem 0 1rem;
+  font-size: 0.92rem;
+  color: var(--hp-muted, rgba(255, 255, 255, 0.72));
+}
+
+.animal-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 0.35rem;
+}
+
+.animal-form-actions .btn-save {
+  width: auto;
+  flex: 1 1 160px;
+  margin: 0;
+}
+
 .btn-save {
   width: 100%;
   padding: 14px 18px;
@@ -913,6 +1063,52 @@ export default {
 .btn-save:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 32px rgba(255, 87, 34, 0.4);
+}
+
+.btn-cancel-edit {
+  padding: 14px 18px;
+  border-radius: 999px;
+  border: 1.5px solid var(--hp-line-strong, rgba(255, 255, 255, 0.18));
+  background: transparent;
+  color: var(--hp-text, #f4f4f5);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.btn-cancel-edit:hover {
+  border-color: rgba(245, 204, 76, 0.45);
+  color: var(--hp-gold, #f5cc4c);
+}
+
+.animal-item-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: stretch;
+  flex-shrink: 0;
+}
+
+.btn-edit-animal {
+  padding: 0.55rem 0.85rem;
+  border-radius: 12px;
+  border: 1.5px solid rgba(245, 204, 76, 0.45);
+  background: rgba(245, 204, 76, 0.1);
+  color: var(--hp-gold, #f5cc4c);
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.btn-edit-animal:hover {
+  background: rgba(245, 204, 76, 0.18);
+  border-color: rgba(245, 204, 76, 0.65);
 }
 
 .admin-content input,
@@ -1452,9 +1648,76 @@ export default {
   background: rgba(0, 0, 0, 0.2);
 }
 
-.support-chat-pane__head p {
+.support-chat-pane__head-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.support-chat-pane__identity {
   margin: 0;
   color: var(--hp-text, #f4f4f5);
+}
+
+.support-chat-pane__approvals {
+  padding: 0.65rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid rgba(245, 204, 76, 0.28);
+  background: rgba(245, 204, 76, 0.06);
+}
+
+.support-chat-pane__approvals-title {
+  margin: 0 0 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--hp-gold, #f5cc4c);
+}
+
+.support-chat-pane__approvals-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.support-chat-pane__approval-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.support-chat-pane__approval-animal {
+  font-weight: 700;
+  color: var(--hp-text, #f4f4f5);
+}
+
+.btn-approve-adoption {
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  border: none;
+  font-weight: 800;
+  font-size: 0.78rem;
+  cursor: pointer;
+  color: #0a0a0c;
+  background: linear-gradient(180deg, var(--hp-gold, #f5cc4c) 0%, #e6b73a 100%);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.btn-approve-adoption:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.btn-approve-adoption:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .support-chat-pane__email {

@@ -13,6 +13,54 @@ Viena lapa (**Vue 3**), kas runā ar **Laravel 12** API. Lietotāji pārlūko dz
 
 ---
 
+## Izstrādes rīki un tehnoloģijas
+
+| Rīks / tehnoloģija | Versija / piezīme |
+|--------------------|-------------------|
+| **PHP** | ≥ 8.2 |
+| **Composer** | Laravel 12 atkarībām |
+| **Laravel** | API, Sanctum, Eloquent, migrācijas |
+| **SQLite** | Noklusējuma DB izstrādei |
+| **Node.js** | ^20.19 vai ≥ 22.12 |
+| **npm** | Frontenda pakotnes |
+| **Vue** | 3 (Composition Options API / SFC) |
+| **Vite** | 7, izstrādes serveris un build |
+| **Vue Router, Pinia** | Maršruti un valoda |
+| **Vuetify 3** | Papildu UI komponentes |
+| **ESLint, Prettier** | Koda stils |
+| **PHPUnit** | Backend testi |
+| **vite-plugin-pwa** | PWA (`manifest` + service worker pēc `npm run build`) |
+
+---
+
+## PWA (progresīvā tīmekļa lietotne)
+
+Pēc `npm run build` mapē `main/frontend/dist/` tiek ģenerēti `manifest.webmanifest`, `sw.js` un `registerSW.js`. Vietni jāapkalpo caur **HTTPS** (vai `localhost`), lai pārlūks piedāvātu instalāciju. Ikona un `theme-color`: `public/logo3.png` un tumšais dizaina fons.
+
+---
+
+## Automātiskā testēšana (5 testa gadījumi)
+
+Backend: `main/backend/tests/Feature/ApiNoslegumaPrasibasTest.php` — pieci API testi (statistika, reģistrācijas validācija, ielogošanās ar žetonu, dzīvnieku saraksts, admin PATCH dzīvniekam).
+
+```powershell
+cd main\backend
+php artisan test --filter=ApiNoslegumaPrasibasTest
+```
+
+---
+
+## Drošība (OWASP) un pieejamība (WCAG)
+
+- **API:** validācija, Sanctum žetoni, admin `middleware`, ierobežota biežuma mēģinājumi uz `/api/register`, `/api/login`, `/api/admin/login`.
+- **HTTP galvenes:** `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy` (skat. `SecurityHeadersMiddleware`).
+- **Paroles:** Laravel `hashed` casts, nav glabāšanas atklātā tekstā.
+- **WCAG (daļēji):** galvenes `aria-*`, saistītie `label`/`for` admin dzīvnieku formā, galvenais saturs `#main-content`.
+
+Pilnai WCAG atbilstībai vēl jāveic manuāla pārbaude (kontrasts, visas formas, tastatūras secība).
+
+---
+
 ## Ko tev vajag uz datora
 
 - **PHP** ≥ 8.2, **Composer**
@@ -112,9 +160,9 @@ Pēc `db:seed` var izmantot, piemēram:
 ## Galvenās lietotāju iespējas
 
 - Mājas lapa: katalogs, meklēšana, **sugu izvēlne** (custom dropdown), adopcijas pieteikums (pēc pierakstīšanās).
-- **Mans konts**: pieteikumi, paziņojumi.
+- **Mans konts**: adopcijas pieteikumi un statuss.
 - **Support čats**: peldoša poga (ne `/admin`), saruna ar adminiem.
-- **Admin**: kontaktu ziņojumi, support čats, pieteikumi, dzīvnieku CRUD, lietotāju pārvaldība.
+- **Admin**: kontaktu ziņojumi, support čats, pieteikumi, dzīvnieku pievienošana/**rediģēšana** (PATCH API) un dzēšana, lietotāju pārvaldība.
 
 ---
 
@@ -127,6 +175,7 @@ Pēc `db:seed` var izmantot, piemēram:
 | `php artisan migrate:fresh --seed` | `main/backend` | **Dzēš** DB un liek no jauna (uzmanīgi!) |
 | `npm run lint` | `main/frontend` | ESLint |
 | `npm run build` | `main/frontend` | Production build |
+| `php artisan test --filter=ApiNoslegumaPrasibasTest` | `main/backend` | Pieci API feature testi |
 
 ---
 

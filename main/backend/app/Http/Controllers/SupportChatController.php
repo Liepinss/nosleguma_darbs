@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AdoptionApplication;
 use App\Models\SupportChatMessage;
 use App\Support\ActivityLogger;
 use App\Models\User;
@@ -114,12 +115,28 @@ class SupportChatController extends Controller
             ->orderBy('id')
             ->get();
 
+        $pendingApplications = AdoptionApplication::query()
+            ->where('user_id', $target->id)
+            ->where('status', 'pending')
+            ->with('animal')
+            ->orderByDesc('id')
+            ->get()
+            ->map(fn (AdoptionApplication $a) => [
+                'id' => $a->id,
+                'animal_id' => $a->animal_id,
+                'animal_name' => $a->animal?->name,
+                'submitted_at' => $a->created_at?->toIso8601String(),
+            ])
+            ->values()
+            ->all();
+
         return response()->json([
             'user' => [
                 'id' => $target->id,
                 'name' => $target->name,
                 'email' => $target->email,
             ],
+            'pending_applications' => $pendingApplications,
             'messages' => $rows->map(fn (SupportChatMessage $m) => $this->mapMessage($m)),
         ]);
     }

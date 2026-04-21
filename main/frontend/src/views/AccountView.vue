@@ -38,44 +38,39 @@
               </div>
               <div class="animal-details">
                 <h3>{{ adoption.animalName }}</h3>
+                <p class="adoption-status-line">
+                  <span
+                    class="adoption-status-badge"
+                    :class="{
+                      'adoption-status-badge--pending': adoption.status === 'pending',
+                      'adoption-status-badge--approved': adoption.status === 'approved',
+                    }"
+                  >
+                    {{ adoptionStatusLabel(adoption.status) }}
+                  </span>
+                </p>
                 <p><strong>{{ t('account.submittedAt') }}</strong> {{ formatDate(adoption.submittedAt) }}</p>
-                <button class="btn-release" @click="releaseAdoption(adoption.id)">{{ t('account.withdraw') }}</button>
+                <button
+                  v-if="adoption.status === 'pending'"
+                  type="button"
+                  class="btn-release"
+                  @click="releaseAdoption(adoption)"
+                >
+                  {{ t('account.withdraw') }}
+                </button>
+                <button
+                  v-else-if="adoption.status === 'approved'"
+                  type="button"
+                  class="btn-release btn-release--approved"
+                  @click="releaseAdoption(adoption)"
+                >
+                  {{ t('account.withdrawApproved') }}
+                </button>
               </div>
             </div>
           </div>
 
           <p v-else class="no-adoption">{{ t('account.noAdoption') }}</p>
-        </div>
-
-        <div class="notifications-section">
-          <h2>{{ t('account.notificationsTitle') }}</h2>
-          <p v-if="!notifications.length" class="no-adoption">{{ t('account.noNotifications') }}</p>
-          <div v-else class="notification-account-list">
-            <div
-              v-for="note in notifications"
-              :key="note.id"
-              class="notification-account-card"
-            >
-              <div class="notification-account-inner">
-                <div class="notification-account-body">
-                  <p class="notification-account-type">{{ notificationTitle(note) }}</p>
-                  <p class="notification-account-text">{{ note.message }}</p>
-                  <p class="notification-account-date">
-                    {{ formatDate(note.moderatedAt || note.approvedAt || note.sentAt) }}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  class="notification-delete-btn"
-                  :title="t('account.notifDelete')"
-                  :aria-label="t('account.notifDeleteAria')"
-                  @click="deleteNotification(note.id)"
-                >
-                  ×
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -84,16 +79,10 @@
 
 <script>
 import { getStoredUser, logoutUser } from '@/api/authApi'
-import {
-  deleteMyApplication,
-  fetchMyApplications,
-  fetchMyNotifications,
-  markMyNotificationsRead,
-} from '@/api/restApi'
+import { deleteMyApplication, fetchMyApplications } from '@/api/restApi'
 import { translate } from '@/i18n/siteMessages'
 import { useLocaleStore } from '@/stores/locale'
 import { clearLoggedInUserIfBlocked, isUserLoggedIn } from '@/utils/authStorage'
-import { removeNotificationForUser } from '@/utils/contactMessages'
 import { mapState } from 'pinia'
 
 export default {
@@ -103,19 +92,15 @@ export default {
       name: '',
       email: '',
       adoptions: [],
-      notifications: [],
-      showNotifications: false,
     }
   },
   mounted() {
     void this.boot()
     window.addEventListener('storage', this.onStorageChange)
-    window.addEventListener('contactMessagesUpdated', this.loadNotifications)
     window.addEventListener('authUpdated', this.onAuthUpdated)
   },
   beforeUnmount() {
     window.removeEventListener('storage', this.onStorageChange)
-    window.removeEventListener('contactMessagesUpdated', this.loadNotifications)
     window.removeEventListener('authUpdated', this.onAuthUpdated)
   },
   computed: {
@@ -126,9 +111,6 @@ export default {
     fallbackAnimalImg() {
       const label = encodeURIComponent(translate(this.lang, 'account.imgFallback'))
       return `https://via.placeholder.com/180?text=${label}`
-    },
-    unreadNotifications() {
-      return this.notifications.filter((note) => !note.read).length
     },
   },
   methods: {
@@ -143,7 +125,6 @@ export default {
       }
       this.syncProfileFromStore()
       await this.loadAdoptions()
-      await this.loadNotifications()
     },
     onAuthUpdated() {
       this.syncProfileFromStore()
@@ -164,47 +145,13 @@ export default {
         this.adoptions = []
       }
     },
-    async loadNotifications() {
-      try {
-        const messages = await fetchMyNotifications()
-        this.notifications = messages
-          .filter((message) => message.status === 'approved')
-          .sort(
-            (a, b) =>
-              new Date(b.moderatedAt || b.approvedAt || b.sentAt) -
-              new Date(a.moderatedAt || a.approvedAt || a.sentAt),
-          )
-      } catch {
-        this.notifications = []
-      }
-    },
-    notificationTitle(note) {
-      if (note.source === 'admin_role_grant') {
-        return translate(this.lang, 'account.notifAdminRole')
-      }
-      return translate(this.lang, 'account.notifFromAdmin')
+    adoptionStatusLabel(status) {
+      const s = status === 'approved' ? 'approved' : 'pending'
+      return translate(this.lang, `account.adoptionStatus.${s}`)
     },
     onStorageChange(event) {
       if (event.key === 'spa_auth_token' || event.key === 'spa_auth_user') {
         void this.boot()
-      }
-    },
-    toggleNotifications() {
-      this.showNotifications = !this.showNotifications
-      if (this.showNotifications) {
-        void this.markNotificationsRead()
-      }
-    },
-    async deleteNotification(id) {
-      await removeNotificationForUser(id)
-      await this.loadNotifications()
-    },
-    async markNotificationsRead() {
-      try {
-        await markMyNotificationsRead()
-        await this.loadNotifications()
-      } catch {
-        /* ignore */
       }
     },
     formatDate(value) {
@@ -218,10 +165,16 @@ export default {
         minute: '2-digit',
       })
     },
-    async releaseAdoption(adoptionId) {
+    async releaseAdoption(adoption) {
+      if (adoption.status === 'approved') {
+        if (!window.confirm(this.t('account.withdrawApprovedConfirm'))) {
+          return
+        }
+      }
       try {
-        await deleteMyApplication(adoptionId)
+        await deleteMyApplication(adoption.id)
         await this.loadAdoptions()
+        window.dispatchEvent(new Event('contactMessagesUpdated'))
       } catch {
         /* ignore */
       }
@@ -324,13 +277,11 @@ export default {
   line-height: 1.45;
 }
 
-.adoption-section,
-.notifications-section {
+.adoption-section {
   margin-top: 2rem;
 }
 
-.adoption-section h2,
-.notifications-section h2 {
+.adoption-section h2 {
   font-family: 'Playfair Display', Georgia, serif;
   color: var(--hp-gold, #f5cc4c);
   margin-bottom: 1rem;
@@ -359,6 +310,32 @@ export default {
   margin-bottom: 0.35rem;
 }
 
+.adoption-status-line {
+  margin: 0 0 0.35rem;
+}
+
+.adoption-status-badge {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.adoption-status-badge--pending {
+  background: rgba(245, 204, 76, 0.12);
+  border: 1px solid rgba(245, 204, 76, 0.35);
+  color: var(--hp-gold, #f5cc4c);
+}
+
+.adoption-status-badge--approved {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(74, 222, 128, 0.4);
+  color: #86efac;
+}
+
 .animal-details p {
   color: var(--hp-muted, rgba(255, 255, 255, 0.7));
   font-size: 0.92rem;
@@ -384,56 +361,19 @@ export default {
   font-size: 0.85rem;
 }
 
+.btn-release--approved {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--hp-text, #f4f4f5);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.btn-release--approved:hover {
+  background: rgba(248, 113, 113, 0.12);
+  border-color: rgba(248, 113, 113, 0.45);
+  color: #fecaca;
+}
+
 .no-adoption {
   color: var(--hp-muted, rgba(255, 255, 255, 0.7));
-}
-
-.notification-account-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.notification-account-card {
-  background: var(--hp-surface, rgba(255, 255, 255, 0.055));
-  border: 1px solid var(--hp-line, rgba(255, 255, 255, 0.1));
-  border-radius: 14px;
-  padding: 0.85rem;
-}
-
-.notification-account-inner {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.notification-account-type {
-  color: var(--hp-gold, #f5cc4c);
-  font-weight: 700;
-  font-size: 0.85rem;
-}
-
-.notification-account-text {
-  color: var(--hp-text, #f4f4f5);
-  margin: 0.35rem 0;
-}
-
-.notification-account-date {
-  color: var(--hp-muted, rgba(255, 255, 255, 0.7));
-  font-size: 0.82rem;
-}
-
-.notification-delete-btn {
-  background: transparent;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  line-height: 1;
-  color: var(--hp-muted, rgba(255, 255, 255, 0.7));
-  padding: 0.15rem;
-}
-
-.notification-delete-btn:hover {
-  color: #fecaca;
 }
 </style>
