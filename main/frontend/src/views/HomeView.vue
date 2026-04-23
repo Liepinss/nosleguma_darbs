@@ -317,15 +317,7 @@
       </div>
     </section>
 
-    <section class="hp-quote" :aria-label="t('quote.aria')">
-      <div class="hp-quote__deco" aria-hidden="true">“</div>
-      <div class="container hp-quote__inner">
-        <blockquote class="hp-quote__text">
-          {{ t('quote.text') }}
-        </blockquote>
-        <cite class="hp-quote__cite">{{ t('quote.cite') }}</cite>
-      </div>
-    </section>
+
 
     <section class="hp-about" id="about">
       <div class="container hp-about__layout">
