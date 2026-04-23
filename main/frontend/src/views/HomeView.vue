@@ -384,7 +384,7 @@
             </div>
             <div class="hp-contact__tile">
               <h3>{{ t('contact.emailTitle') }}</h3>
-              <p><a href="mailto:kontakti@dzivniekucentrs.lv">kontakti@dzivniekucentrs.lv</a></p>
+              <p><a href="mailto:kontakti@dzivniekucentrs.lv">Laimigaskepas@gmail.com</a></p>
             </div>
             <div class="hp-contact__tile">
               <h3>{{ t('contact.hoursTitle') }}</h3>
