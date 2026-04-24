@@ -116,7 +116,7 @@ php artisan test --filter=ApiNoslegumaPrasibasTest
 - **PHP** ≥ 8.2, **Composer**
 - **Node.js** ^20.19 vai ≥ 22.12, **npm**
 - (Ieteicams) **Git**
-- **Windows:** šeit komandas **CMD**; SQLite izveidei — CMD vai PowerShell variants.
+- **Windows:** šī dokumentācija **pēc noklusējuma ir paredzēta CMD** (Command Prompt), ne PowerShell. PowerShell minēts tikai kā **īsa alternatīva** vienai komandai — tukšā `database.sqlite` izveidei.
 
 Pārbaudes: `php -v`, `composer -V`, `node -v`, `npm -v`.
 
@@ -130,6 +130,8 @@ Pārbaudes: `php -v`, `composer -V`, `node -v`, `npm -v`.
 ---
 
 ## Ātrā palaišana izstrādei (CMD, Windows)
+
+**Visas komandas zemāk rakstītas CMD sintaksē** (`cd`, `copy`, `type nul > …`). Atver **Command Prompt**, ne obligāti PowerShell.
 
 1. **Sakne** — mape ar apakšmapēm `main\backend` un `main\frontend` (pēc `git clone` vai ZIP struktūra var būt, piem., `...\nosleguma_darbs-main\main\`).
 2. **Divi CMD logi**: vispirms `php artisan serve`, tad `npm run dev`; **abi** jātur darbībā.
