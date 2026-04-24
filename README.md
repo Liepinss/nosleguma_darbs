@@ -150,8 +150,7 @@ Pēc `db:seed` var izmantot, piemēram:
 ### Admin panelis (`/admin`)
 
 1. Atver frontendā **`/admin`**.
-2. Ievadi paroli no **`ADMIN_PANEL_PASSWORD`** (noklusējums `.env.example`: `adminRVT`).
-3. Backend izveido / izmanto tehnisku lietotāju `panel-admin@laimigas-kepas.local` ar **Sanctum** žetonu un `is_admin`.
+2. Backend izveido / izmanto tehnisku lietotāju `panel-admin@laimigas-kepas.local` ar **Sanctum** žetonu un `is_admin`.
 
 **Īpašnieka** konts komandā (seed): `TeamUserSeeder` — piem. `rudolfs.liepins@mapon.com` ar `is_owner` (aizsardzība pret bloķēšanu / admin noņemšanu).
 
