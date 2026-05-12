@@ -1,0 +1,15 @@
+/* Globālie tokeni — saskaņoti ar mājas lapu (home-premium) */
+:root {
+  --hp-gold: #f5cc4c;
+  --hp-orange: #ff5722;
+  --hp-orange-deep: #e64a19;
+  --hp-bg: #0a0a0c;
+  --hp-bg-mid: #0e1118;
+  --hp-bg-elevated: #141820;
+  --hp-surface: rgba(255, 255, 255, 0.055);
+  --hp-surface-hover: rgba(255, 255, 255, 0.09);
+  --hp-text: #f4f4f5;
+  --hp-muted: rgba(255, 255, 255, 0.7);
+  --hp-line: rgba(255, 255, 255, 0.1);
+  --hp-line-strong: rgba(255, 255, 255, 0.18);
+}
