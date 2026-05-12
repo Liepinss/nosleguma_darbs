@@ -1008,6 +1008,8 @@ footer {
     padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
     border-left: 1px solid var(--hp-line-strong);
     box-shadow: -12px 0 40px rgba(0, 0, 0, 0.45);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   nav.open {
